@@ -1,6 +1,7 @@
 # API Gateway & Microservice Management [![Build Status][badge-travis-image]][badge-travis-url]
 [![][kong-logo]][kong-url]
 
+Test text.
 Kong is a scalable, open source API Layer *(also known as an API Gateway, or
 API Middleware)*. Kong was originally built at [Mashape][mashape-url] to
 secure, manage and extend over
@@ -318,4 +319,3 @@ limitations under the License.
 [busted]: https://github.com/Olivine-Labs/busted
 [luacheck]: https://github.com/mpeterv/luacheck
 [Luarocks]: https://luarocks.org
-
