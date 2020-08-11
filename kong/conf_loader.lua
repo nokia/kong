@@ -113,12 +113,21 @@ local CONF_INFERENCES = {
                          }
                        },
 
-  database = { enum = { "postgres", "cassandra", "off" }  },
+  database = { enum = { "postgres", "cassandra", "maria", "off" }  },
+
   pg_port = { typ = "number" },
   pg_timeout = { typ = "number" },
   pg_password = { typ = "string" },
   pg_ssl = { typ = "boolean" },
   pg_ssl_verify = { typ = "boolean" },
+
+  maria_port = { typ = "number" },
+  maria_password = { typ = "string" },
+  maria_timeout = { typ = "number" },
+  maria_ssl = { typ = "boolean" },
+  maria_ssl_verify = { typ = "boolean" },
+  maria_socket_pool_size = { typ = "number" },
+  maria_socket_keepalive_timeout = { typ = "number" },
 
   cassandra_contact_points = { typ = "array" },
   cassandra_port = { typ = "number" },
@@ -196,6 +205,7 @@ local CONF_SENSITIVE_PLACEHOLDER = "******"
 local CONF_SENSITIVE = {
   pg_password = true,
   cassandra_password = true,
+  maria_password = true,
 }
 
 
@@ -205,6 +215,9 @@ local typ_checks = {
   number = function(v) return type(v) == "number" end,
   boolean = function(v) return type(v) == "boolean" end,
   ngx_boolean = function(v) return v == "on" or v == "off" end,
+  -- regex below accepts the ngx size values which can be specified in bytes,
+  -- kilobytes (suffixes k and K) or megabytes (suffixes m and M), for example, '1024', '8k', '1m'.
+  ngx_size = function(v) return string.match(v, '^%d+[kKmMgG]?$') ~= nil end,
 }
 
 

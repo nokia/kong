@@ -152,4 +152,54 @@ return {
       ]]))
     end,
   },
+
+  maria = {
+    up = [[
+      BEGIN NOT ATOMIC
+        DECLARE `no_such_table` CONDITION FOR SQLSTATE '42S02';
+        DECLARE EXIT HANDLER FOR `no_such_table`
+          BEGIN
+            -- Do nothing, accept existing state
+          END;
+        ALTER TABLE `oauth2_credentials` ADD COLUMN IF NOT EXISTS `redirect_uris` JSON;
+        UPDATE `oauth2_credentials` SET `redirect_uris` = REGEXP_REPLACE(`redirect_uri`, '\\[(.*)\\]', '{\\1}');
+      END;
+
+
+      BEGIN NOT ATOMIC
+        DECLARE `no_such_table` CONDITION FOR SQLSTATE '42S02';
+        DECLARE EXIT HANDLER FOR `no_such_table`
+          BEGIN
+            -- Do nothing, accept existing state
+          END;
+        ALTER TABLE `oauth2_authorization_codes` ADD COLUMN IF NOT EXISTS `ttl` TIMESTAMP(6) NULL DEFAULT NULL;
+        UPDATE `oauth2_authorization_codes` SET `ttl` = TIMESTAMPADD(SECOND, 300, `created_at`);
+      END;
+
+
+      BEGIN NOT ATOMIC
+        DECLARE `no_such_table` CONDITION FOR SQLSTATE '42S02';
+        DECLARE EXIT HANDLER FOR `no_such_table`
+          BEGIN
+            -- Do nothing, accept existing state
+          END;
+        ALTER TABLE `oauth2_tokens` ADD COLUMN IF NOT EXISTS `ttl` TIMESTAMP(6) NULL DEFAULT NULL;
+        UPDATE `oauth2_tokens` SET `ttl` = TIMESTAMPADD(SECOND, COALESCE(`expires_in`, 0), `created_at`);
+      END;
+    ]],
+
+    teardown = function(connector)
+      assert(connector:connect_migrations())
+      assert(connector:query [[
+        BEGIN NOT ATOMIC
+          DECLARE `no_such_table` CONDITION FOR SQLSTATE '42S02';
+          DECLARE EXIT HANDLER FOR `no_such_table`
+            BEGIN
+              -- Do nothing, accept existing state
+            END;
+          ALTER TABLE `oauth2_credentials` DROP COLUMN IF EXISTS `redirect_uri`;
+        END;
+      ]])
+    end,
+  },
 }

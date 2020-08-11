@@ -105,6 +105,16 @@ local function new_err_t(self, code, message, errors, name)
     error("unknown error code: " .. tostring(code))
   end
 
+  if message and type(message) == "table" then
+    local tmp = ""
+
+    for k, v in pairs(message) do
+      tmp = tmp .. tostring(k) .. " - " .. tostring(v) .. "\n"
+    end
+
+    message = tmp
+  end
+
   if message and type(message) ~= "string" then
     error("message must be a string or nil")
   end

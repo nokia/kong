@@ -32,4 +32,22 @@ return {
       CREATE INDEX IF NOT EXISTS ON jwt_secrets(consumer_id);
     ]],
   },
+
+  maria = {
+    up = [[
+      CREATE TABLE IF NOT EXISTS `jwt_secrets` (
+        `id`              VARCHAR(36),
+        `created_at`      TIMESTAMP(0)  DEFAULT NOW(0),
+        `consumer_id`     VARCHAR(36),
+        `key`             VARCHAR(255),
+        `secret`          TEXT,
+        `algorithm`       TEXT,
+        `rsa_public_key`  TEXT,
+
+        PRIMARY KEY (`id`),
+        FOREIGN KEY (`consumer_id`) REFERENCES `consumers` (`id`) ON DELETE CASCADE,
+        UNIQUE  KEY (`key`)
+      ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+    ]],
+  },
 }

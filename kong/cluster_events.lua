@@ -87,6 +87,9 @@ function _M.new(opts)
     elseif opts.db.strategy == "postgres" then
       db_strategy = require "kong.cluster_events.strategies.postgres"
 
+    elseif opts.db.strategy == "maria" then
+      db_strategy = require "kong.cluster_events.strategies.maria"
+
     elseif opts.db.strategy == "off" then
       db_strategy = require "kong.cluster_events.strategies.off"
 

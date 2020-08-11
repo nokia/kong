@@ -33,6 +33,9 @@ local function execute(args)
   start.execute(args)
 end
 
+-- Values read from the console have the highest priority over everything else.
+-- When '--db-timeout' had hard-coded default, other sources were ignored,
+-- even when the user does not specified '--db-timeout' during kong start/stop/restart/su.
 local lapp = [[
 Usage: kong restart [OPTIONS]
 
@@ -47,7 +50,7 @@ Options:
  -p,--prefix      (optional string)   prefix at which Kong should be running
  --nginx-conf     (optional string)   custom Nginx configuration template
  --run-migrations (optional boolean)  optionally run migrations on the DB
- --db-timeout     (default 60)
+ --db-timeout     (optional number)
  --lock-timeout   (default 60)
 ]]
 

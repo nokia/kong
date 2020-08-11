@@ -33,4 +33,15 @@ return {
       end
     end,
   },
+
+  maria = {
+    up = [[
+    ]],
+
+    teardown = function(connector)
+      assert(connector:query([[
+        DELETE FROM plugins WHERE name = 'galileo';
+      ]]))
+    end,
+  },
 }

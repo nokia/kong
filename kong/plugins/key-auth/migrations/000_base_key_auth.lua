@@ -24,4 +24,19 @@ return {
       CREATE INDEX IF NOT EXISTS ON keyauth_credentials(consumer_id);
     ]],
   },
+
+  maria = {
+    up = [[
+      CREATE TABLE IF NOT EXISTS `keyauth_credentials` (
+        `id`           VARCHAR(36),
+        `created_at`   TIMESTAMP(0)   DEFAULT NOW(0),
+        `consumer_id`  VARCHAR(36),
+        `key`          VARCHAR(255),
+
+        PRIMARY KEY (`id`),
+        FOREIGN KEY (`consumer_id`) REFERENCES `consumers` (`id`) ON DELETE CASCADE,
+        UNIQUE  KEY (`key`)
+      ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+    ]],
+  },
 }

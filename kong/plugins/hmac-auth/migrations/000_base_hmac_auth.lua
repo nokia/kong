@@ -26,4 +26,20 @@ return {
       CREATE INDEX IF NOT EXISTS ON hmacauth_credentials(consumer_id);
     ]],
   },
+
+  maria = {
+    up = [[
+      CREATE TABLE IF NOT EXISTS `hmacauth_credentials` (
+        `id`           VARCHAR(36),
+        `created_at`   TIMESTAMP(0)   DEFAULT NOW(0),
+        `consumer_id`  VARCHAR(36),
+        `username`     VARCHAR(255),
+        `secret`       TEXT,
+
+        PRIMARY KEY (`id`),
+        FOREIGN KEY (`consumer_id`) REFERENCES `consumers` (`id`) ON DELETE CASCADE,
+        UNIQUE  KEY (`username`)
+      ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+    ]],
+  },
 }

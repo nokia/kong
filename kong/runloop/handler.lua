@@ -562,6 +562,10 @@ return {
         elseif singletons.configuration.database == "postgres" then
           -- pg_timeout is defined in ms
           build_router_timeout = kong.configuration.pg_timeout / 1000
+
+        elseif singletons.configuration.database == "maria" then
+          -- maria_timeout is defined in ms
+          build_router_timeout = kong.configuration.maria_timeout / 1000
         end
       end
     end

@@ -119,7 +119,7 @@ local config_yml
 local each_strategy
 
 do
-  local default_strategies = {"postgres", "cassandra"}
+  local default_strategies = {"postgres", "cassandra", "maria"}
   local env_var = os.getenv("KONG_DATABASE")
   if env_var then
     default_strategies = { env_var }

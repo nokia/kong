@@ -25,4 +25,20 @@ return {
       CREATE INDEX IF NOT EXISTS ON acls(consumer_id);
     ]],
   },
+
+  maria = {
+    up = [[
+      CREATE TABLE IF NOT EXISTS `acls` (
+        `id`           VARCHAR(36),
+        `created_at`   TIMESTAMP(0)     DEFAULT NOW(0),
+        `consumer_id`  VARCHAR(36),
+        `group`        VARCHAR(255),
+
+        PRIMARY KEY(`id`),
+        FOREIGN KEY (`consumer_id`) REFERENCES `consumers` (`id`) ON DELETE CASCADE
+      ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
+      CREATE INDEX IF NOT EXISTS `acls_group` ON acls(`group`);
+    ]],
+  },
 }

@@ -364,4 +364,190 @@ return {
       CREATE INDEX IF NOT EXISTS apis_name_idx ON apis(name);
     ]],
   },
+
+  maria = {
+    up = [[
+      CREATE TABLE IF NOT EXISTS `cluster_events` (
+        `id`         VARCHAR(36),
+        `node_id`    VARCHAR(36)    NOT NULL,
+        `at`         TIMESTAMP(6)   NOT NULL    DEFAULT NOW(6),
+        `nbf`        TIMESTAMP(6)   NULL        DEFAULT NULL,
+        `expire_at`  TIMESTAMP(6)   NOT NULL    DEFAULT NOW(6),
+        `channel`    VARCHAR(255),
+        `data`       TEXT,
+
+        PRIMARY KEY (`id`)
+      ) ENGINE = InnoDB DEFAULT CHARSET=utf8;
+
+      CREATE INDEX IF NOT EXISTS `idx_cluster_events_at`      ON `cluster_events` (`at`);
+      CREATE INDEX IF NOT EXISTS `idx_cluster_events_channel` ON `cluster_events` (`channel`);
+
+
+      CREATE TABLE IF NOT EXISTS `services` (
+        `id`               VARCHAR(36),
+        `created_at`       TIMESTAMP(0)   NULL    DEFAULT NULL,
+        `updated_at`       TIMESTAMP(0)   NULL    DEFAULT NULL,
+        `name`             VARCHAR(255),
+        `retries`          BIGINT,
+        `protocol`         TEXT,
+        `host`             TEXT,
+        `port`             BIGINT,
+        `path`             TEXT,
+        `connect_timeout`  BIGINT,
+        `write_timeout`    BIGINT,
+        `read_timeout`     BIGINT,
+
+        PRIMARY KEY (`id`),
+        UNIQUE KEY (`name`)
+      ) ENGINE = InnoDB DEFAULT CHARSET=utf8;
+
+
+
+      CREATE TABLE IF NOT EXISTS `routes` (
+        `id`              VARCHAR(36),
+        `created_at`      TIMESTAMP(0)   NULL    DEFAULT NULL,
+        `updated_at`      TIMESTAMP(0)   NULL    DEFAULT NULL,
+        `service_id`      VARCHAR(36),
+        `protocols`       JSON,
+        `methods`         JSON,
+        `hosts`           JSON,
+        `paths`           JSON,
+        `regex_priority`  BIGINT,
+        `strip_path`      BOOLEAN,
+        `preserve_host`   BOOLEAN,
+
+        PRIMARY KEY (`id`),
+        FOREIGN KEY (`service_id`) REFERENCES `services` (`id`)
+      ) ENGINE = InnoDB DEFAULT CHARSET=utf8;
+
+
+
+      CREATE TABLE IF NOT EXISTS `apis` (
+        `id`                        VARCHAR(36),
+        `created_at`                TIMESTAMP(3)  DEFAULT NOW(3),
+        `name`                      VARCHAR(255),
+        `upstream_url`              TEXT,
+        `preserve_host`             BOOLEAN       NOT NULL,
+        `retries`                   SMALLINT      DEFAULT 5,
+        `https_only`                BOOLEAN,
+        `http_if_terminated`        BOOLEAN,
+        `hosts`                     TEXT,
+        `uris`                      TEXT,
+        `methods`                   TEXT,
+        `strip_uri`                 BOOLEAN,
+        `upstream_connect_timeout`  INTEGER,
+        `upstream_send_timeout`     INTEGER,
+        `upstream_read_timeout`     INTEGER,
+
+        PRIMARY KEY (`id`),
+        UNIQUE KEY (`name`)
+      ) ENGINE = InnoDB DEFAULT CHARSET=utf8;
+
+
+
+      CREATE TABLE IF NOT EXISTS `certificates` (
+        `id`          VARCHAR(36),
+        `created_at`  TIMESTAMP(0)  DEFAULT NOW(0),
+        `cert`        TEXT,
+        `key`         TEXT,
+
+        PRIMARY KEY (`id`)
+      ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
+
+
+      CREATE TABLE IF NOT EXISTS `snis` (
+        `id`              VARCHAR(36),
+        `created_at`      TIMESTAMP(0)   DEFAULT NOW(0),
+        `name`            VARCHAR(255)  NOT NULL,
+        `certificate_id`  VARCHAR(36),
+
+        PRIMARY KEY (`id`),
+        FOREIGN KEY (`certificate_id`) REFERENCES `certificates` (`id`),
+        UNIQUE  KEY (`name`)
+      ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
+
+      CREATE TABLE IF NOT EXISTS `consumers` (
+        `id`          VARCHAR(36),
+        `created_at`  TIMESTAMP(0)   DEFAULT NOW(0),
+        `username`    VARCHAR(255),
+        `custom_id`   VARCHAR(255),
+
+        PRIMARY KEY (`id`),
+        UNIQUE KEY (`username`),
+        UNIQUE KEY (`custom_id`)
+      ) ENGINE = InnoDB DEFAULT CHARSET=utf8;
+
+
+
+      CREATE TABLE IF NOT EXISTS `plugins` (
+        `id`           VARCHAR(36),
+        `created_at`   TIMESTAMP(0)  DEFAULT NOW(0),
+        `name`         VARCHAR(255)  NOT NULL,
+        `consumer_id`  VARCHAR(36),
+        `service_id`   VARCHAR(36),
+        `route_id`     VARCHAR(36),
+        `api_id`       VARCHAR(36),
+        `config`       JSON          NOT NULL,
+        `enabled`      BOOLEAN       NOT NULL,
+
+        PRIMARY KEY (`id`, `name`),
+        UNIQUE KEY (`id`),
+        FOREIGN KEY (`consumer_id`) REFERENCES `consumers` (`id`) ON DELETE CASCADE,
+        FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE,
+        FOREIGN KEY (`route_id`) REFERENCES `routes` (`id`) ON DELETE CASCADE,
+        FOREIGN KEY (`api_id`) REFERENCES `apis` (`id`) ON DELETE CASCADE
+      ) ENGINE = InnoDB DEFAULT CHARSET=utf8;
+
+
+
+      CREATE TABLE IF NOT EXISTS `upstreams` (
+        `id`                    VARCHAR(36),
+        `created_at`            TIMESTAMP(3)  DEFAULT NOW(3),
+        `name`                  VARCHAR(255),
+        `hash_on`               TEXT,
+        `hash_fallback`         TEXT,
+        `hash_on_header`        TEXT,
+        `hash_fallback_header`  TEXT,
+        `hash_on_cookie`        TEXT,
+        `hash_on_cookie_path`   TEXT,
+        `slots`                 INTEGER       NOT NULL,
+        `healthchecks`          JSON,
+
+        PRIMARY KEY (`id`),
+        UNIQUE  KEY (`name`)
+      ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
+
+
+      CREATE TABLE IF NOT EXISTS `targets` (
+        `id`           VARCHAR(36),
+        `created_at`   TIMESTAMP(3)  DEFAULT NOW(3),
+        `upstream_id`  VARCHAR(36),
+        `target`       VARCHAR(255)  NOT NULL,
+        `weight`       INTEGER       NOT NULL,
+
+        PRIMARY KEY (`id`),
+        FOREIGN KEY (`upstream_id`) REFERENCES `upstreams` (`id`) ON DELETE CASCADE
+      ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
+      CREATE INDEX IF NOT EXISTS `targets_target_idx` ON `targets` (`target`);
+
+
+
+      -- TODO: delete on 1.0.0 migrations
+      CREATE TABLE IF NOT EXISTS `ttls` (
+        `primary_key_value`  VARCHAR(255)  NOT NULL,
+        `primary_uuid_value` VARCHAR(36),
+        `table_name`         VARCHAR(255)  NOT NULL,
+        `primary_key_name`   VARCHAR(255)  NOT NULL,
+        `expire_at`          TIMESTAMP(6)  NOT NULL   DEFAULT NOW(6),
+
+        PRIMARY KEY (`primary_key_value`, `table_name`)
+      ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
+      CREATE INDEX IF NOT EXISTS `ttls_primary_uuid_value_idx` ON `ttls` (`primary_uuid_value`);
+    ]],
+  },
 }

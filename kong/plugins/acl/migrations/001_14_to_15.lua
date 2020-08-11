@@ -83,4 +83,40 @@ return {
       end
     end,
   },
+
+  maria = {
+    up = [[
+      BEGIN NOT ATOMIC
+        DECLARE `no_such_table` CONDITION FOR SQLSTATE '42S02';
+        DECLARE EXIT HANDLER FOR `no_such_table`
+          BEGIN
+            -- Do nothing, accept existing state
+          END;
+        ALTER TABLE `acls` ADD COLUMN IF NOT EXISTS `cache_key` VARCHAR(255) UNIQUE;
+      END;
+    ]],
+
+    teardown = function(connector, helpers)
+      assert(connector:connect_migrations())
+
+      for rows, err in connector:iterate('SELECT * FROM `acls` ORDER BY `created_at`;') do
+        if err then
+          return nil, err
+        end
+
+        for i = 1, #rows do
+          local row = rows[i]
+          local cache_key = string.format("%s:%s:%s:::", "acls",
+                                          row.consumer_id or "",
+                                          row.group or "")
+
+          local sql = string.format([[
+            UPDATE `acls` SET `cache_key` = '%s' WHERE `id` = '%s';
+          ]], cache_key, row.id)
+
+          assert(connector:query(sql))
+        end
+      end
+    end,
+  },
 }

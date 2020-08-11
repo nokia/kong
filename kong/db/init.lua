@@ -503,8 +503,7 @@ do
             n_pending = n_pending + 1
           end
 
-          ok, err = self.connector:record_migration(t.subsystem, mig.name,
-                                                    state)
+          ok, err = self.connector:record_migration(t.subsystem, mig.name, state)
           if not ok then
             self.connector:close()
             return nil, fmt_err(self, "failed to record migration '%s': %s",

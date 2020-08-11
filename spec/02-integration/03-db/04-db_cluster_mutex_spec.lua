@@ -75,6 +75,12 @@ for _, strategy in helpers.each_strategy() do
         end)
 
         local t2 = ngx.thread.spawn(function()
+          -- sleep has been added for maria only because it was observed that
+          -- lock operations implemented in maria connector works a little bit
+          -- slower than corresponding lock operations for postgres and cassandra
+          if strategy == "maria" then
+            ngx.sleep(0.1)
+          end
           local _, err = db:cluster_mutex("my_key_3", nil, cb2)
           assert.is_nil(err)
         end)

@@ -388,4 +388,82 @@ return {
       assert(connector:query("DROP TABLE IF EXISTS schema_migrations"))
     end,
   },
+
+  maria = {
+    up = [[
+      BEGIN NOT ATOMIC
+        DECLARE `no_such_table` CONDITION FOR SQLSTATE '42S02';
+        DECLARE EXIT HANDLER FOR `no_such_table`
+          BEGIN
+            -- Do nothing, accept existing state
+          END;
+        ALTER TABLE `routes` ADD COLUMN IF NOT EXISTS `name` VARCHAR(255) UNIQUE;
+        ALTER TABLE `routes` ADD COLUMN IF NOT EXISTS `snis` JSON;
+        ALTER TABLE `routes` ADD COLUMN IF NOT EXISTS `sources` JSON;
+        ALTER TABLE `routes` ADD COLUMN IF NOT EXISTS `destinations` JSON;
+      END;
+
+      BEGIN NOT ATOMIC
+        DECLARE `no_such_table` CONDITION FOR SQLSTATE '42S02';
+        DECLARE `invalid_table_definition` CONDITION FOR SQLSTATE '42000';
+        DECLARE EXIT HANDLER FOR `no_such_table`
+          BEGIN
+            -- Do nothing, accept existing state
+          END;
+        DECLARE CONTINUE HANDLER FOR `invalid_table_definition`
+          BEGIN
+            -- Do nothing, accept existing state
+          END;
+        ALTER TABLE `plugins` DROP PRIMARY KEY;
+        ALTER TABLE `plugins` DROP INDEX `id`;
+        ALTER TABLE `plugins` ADD PRIMARY KEY (`id`);
+      END;
+
+      BEGIN NOT ATOMIC
+        DECLARE `no_such_table` CONDITION FOR SQLSTATE '42S02';
+        DECLARE EXIT HANDLER FOR `no_such_table`
+          BEGIN
+            -- Do nothing, accept existing state
+          END;
+        ALTER TABLE `plugins` ADD COLUMN IF NOT EXISTS `cache_key` VARCHAR(255) UNIQUE;
+        ALTER TABLE `plugins` ADD COLUMN IF NOT EXISTS `run_on` VARCHAR(255);
+        CREATE INDEX IF NOT EXISTS `plugins_run_on_idx` ON `plugins` (`run_on`);
+      END;
+
+      CREATE TABLE IF NOT EXISTS `cluster_ca`(
+        `pk`   BOOLEAN  NOT NULL   CHECK(`pk` = true),
+        `key`  TEXT     NOT NULL,
+        `cert` TEXT     NOT NULL,
+
+        PRIMARY KEY (`pk`)
+      ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+    ]],
+
+    teardown = function(connector, helpers)
+      assert(connector:connect_migrations())
+
+      for row, err in connector:iterate("SELECT * FROM `plugins`;") do
+        if err then
+          return nil, err
+        end
+
+        local cache_key = table.concat({
+          "plugins",
+          row.name,
+          row.route_id    == ngx.null and "" or row.route_id,
+          row.service_id  == ngx.null and "" or row.service_id,
+          row.consumer_id == ngx.null and "" or row.consumer_id,
+          row.api_id      == ngx.null and "" or row.api_id,
+        }, ":")
+
+        local sql = string.format([[
+          UPDATE `plugins` SET `cache_key` = '%s' WHERE `id` = '%s';
+        ]], cache_key, row.id)
+
+        assert(connector:query(sql))
+      end
+
+      assert(connector:query('DROP TABLE IF EXISTS `schema_migrations`;'))
+    end,
+  },
 }

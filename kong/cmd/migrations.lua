@@ -6,6 +6,9 @@ local kong_global = require "kong.global"
 local migrations_utils = require "kong.cmd.utils.migrations"
 
 
+-- Values read from the console have the highest priority over everything else.
+-- When '--db-timeout' had hard-coded default, other sources were ignored,
+-- even when the user does not specified '--db-timeout' during kong start/stop/restart/su.
 local lapp = [[
 Usage: kong migrations COMMAND [OPTIONS]
 
@@ -33,7 +36,7 @@ Options:
  -f,--force                         Run migrations even if database reports
                                     as already executed.
 
- --db-timeout     (default 60)      Timeout, in seconds, for all database
+ --db-timeout     (optional number) Timeout, in seconds, for all database
                                     operations (including schema consensus for
                                     Cassandra).
 
@@ -70,8 +73,6 @@ end
 
 
 local function execute(args)
-  args.db_timeout = args.db_timeout * 1000
-  args.lock_timeout = args.lock_timeout
 
   if args.quiet then
     log.disable()
@@ -79,10 +80,25 @@ local function execute(args)
 
   local conf = assert(conf_loader(args.conf))
 
-  conf.pg_timeout = args.db_timeout -- connect + send + read
+  -- The code has been moved from the mysql driver, which requires a specific
+  -- version of ngx_lua for its proper operation. The code in the driver caused
+  -- failures in unit tests for unexplained reasons.
+  if conf.database == "maria" then
+    if not ngx.config
+      or not ngx.config.ngx_lua_version
+      or ngx.config.ngx_lua_version < 9011
+    then
+      error("ngx_lua 0.9.11+ required by mysql driver.")
+    end
+  end
 
-  conf.cassandra_timeout = args.db_timeout -- connect + send + read
-  conf.cassandra_schema_consensus_timeout = args.db_timeout
+  if args.db_timeout then
+    args.db_timeout = args.db_timeout * 1000
+    conf.pg_timeout = args.db_timeout -- connect + send + read
+    conf.maria_timeout = args.db_timeout -- connect + send + read
+    conf.cassandra_timeout = args.db_timeout -- connect + send + read
+    conf.cassandra_schema_consensus_timeout = args.db_timeout
+  end
 
   _G.kong = kong_global.new()
   kong_global.init_pdk(_G.kong, conf, nil) -- nil: latest PDK

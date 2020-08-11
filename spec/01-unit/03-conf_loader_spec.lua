@@ -451,7 +451,7 @@ describe("Configuration loader", function()
       local conf, err = conf_loader(nil, {
         database = "mysql"
       })
-      assert.equal("database has an invalid value: 'mysql' (postgres, cassandra, off)", err)
+      assert.equal("database has an invalid value: 'mysql' (postgres, cassandra, maria, off)", err)
       assert.is_nil(conf)
 
       conf, err = conf_loader(nil, {

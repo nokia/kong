@@ -411,6 +411,10 @@ function Kong.init()
     elseif kong.configuration.database == "postgres" then
       -- pg_timeout is defined in ms
       timeout = kong.configuration.pg_timeout / 1000
+
+    elseif kong.configuration.database == "maria" then
+      -- maria_timeout is defined in ms
+      timeout = kong.configuration.maria_timeout / 1000
     end
     PLUGINS_MAP_MUTEX_OPTS = {
       name = "plugins_map",
@@ -617,7 +621,7 @@ function Kong.balancer()
 
   else
     -- first try, so set the max number of retries
-    local retries = balancer_data.retries
+    local retries = tonumber(balancer_data.retries)
     if retries > 0 then
       set_more_tries(retries)
     end

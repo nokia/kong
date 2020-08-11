@@ -44,4 +44,35 @@ return {
       ]]))
     end,
   },
+
+  maria = {
+    up = [[
+    ]],
+
+    teardown = function(connector)
+      assert(connector:connect_migrations())
+      assert(connector:query [[
+        BEGIN NOT ATOMIC
+        DECLARE `no_such_table` CONDITION FOR SQLSTATE '42S02';
+        DECLARE EXIT HANDLER FOR `no_such_table`
+          BEGIN
+            -- Do nothing, accept existing state
+          END;
+        ALTER TABLE `oauth2_authorization_codes` DROP FOREIGN KEY IF EXISTS `oauth2_authorization_codes_api_id_fk`;
+        ALTER TABLE `oauth2_authorization_codes` DROP COLUMN IF EXISTS `api_id`;
+        END;
+
+
+        BEGIN NOT ATOMIC
+        DECLARE `no_such_table` CONDITION FOR SQLSTATE '42S02';
+        DECLARE EXIT HANDLER FOR `no_such_table`
+          BEGIN
+            -- Do nothing, accept existing state
+          END;
+        ALTER TABLE `oauth2_tokens` DROP FOREIGN KEY IF EXISTS `oauth2_tokens_api_id_fk`;
+        ALTER TABLE `oauth2_tokens` DROP COLUMN IF EXISTS `api_id`;
+        END;
+      ]])
+    end,
+  },
 }

@@ -111,4 +111,20 @@ return {
       );
     ]],
   },
+
+  maria = {
+    up = [[
+      CREATE TABLE IF NOT EXISTS `response_ratelimiting_metrics` (
+        `identifier`   VARCHAR(255)   NOT NULL,
+        `period`       VARCHAR(255)   NOT NULL,
+        `period_date`  TIMESTAMP(6)   NOT NULL    DEFAULT NOW(6),
+        `service_id`   VARCHAR(36)    NOT NULL    DEFAULT '00000000-0000-0000-0000-000000000000',
+        `route_id`     VARCHAR(36)    NOT NULL    DEFAULT '00000000-0000-0000-0000-000000000000',
+        `api_id`       VARCHAR(36)    NOT NULL    DEFAULT '00000000-0000-0000-0000-000000000000',
+        `value`        INTEGER,
+
+        PRIMARY KEY (`identifier`, `period`, `period_date`, `service_id`, `route_id`, `api_id`)
+      );
+    ]],
+  },
 }

@@ -6,6 +6,9 @@ local utils   = require "kong.tools.utils"
 for _, strategy in helpers.each_strategy() do
   local postgres_only = strategy == "postgres" and it or pending
   local cassandra_only = strategy == "cassandra" and it or pending
+  local maria_only = strategy == "maria" and it or pending
+  local postgres_cassandra_only = (strategy == "postgres" or
+                                   strategy == "cassandra") and it or pending
 
 
   describe("kong.db.init [#" .. strategy .. "]", function()
@@ -48,6 +51,15 @@ for _, strategy in helpers.each_strategy() do
             strategy = "Cassandra",
             db_desc = "keyspace",
             db_name = helpers.test_conf.cassandra_keyspace,
+            db_ver  = "unknown",
+          }, infos)
+
+        elseif strategy == "maria" then
+          assert.same({
+            strategy = "MariaDB",
+            db_desc = "database",
+            db_name = helpers.test_conf.maria_database,
+            db_schema = helpers.test_conf.maria_schema or "",
             db_ver  = "unknown",
           }, infos)
 
@@ -123,6 +135,15 @@ for _, strategy in helpers.each_strategy() do
           strategy = "Cassandra",
           db_desc = "keyspace",
           db_name = helpers.test_conf.cassandra_keyspace,
+          db_ver  = infos.db_ver,
+        }, infos)
+
+      elseif strategy == "maria" then
+        assert.same({
+          strategy = "MariaDB",
+          db_desc = "database",
+          db_name = helpers.test_conf.maria_database,
+          db_schema = helpers.test_conf.maria_schema or "",
           db_ver  = infos.db_ver,
         }, infos)
 
@@ -218,7 +239,7 @@ for _, strategy in helpers.each_strategy() do
       assert.is_table(conn)
     end)
 
-    it("returns opened connection when using cosockets", function()
+    postgres_cassandra_only("returns opened connection when using cosockets", function()
       -- bin/busted runs with ngx.IS_CLI = true, which forces luasocket to
       -- be used in the DB connector (for custom CAs to work)
       -- Disable this behavior for this test, especially considering we
@@ -247,7 +268,7 @@ for _, strategy in helpers.each_strategy() do
       db:close()
     end)
 
-    it("returns opened connection when using luasocket", function()
+    postgres_cassandra_only("returns opened connection when using luasocket", function()
       ngx.IS_CLI = true
 
       local db, err = DB.new(helpers.test_conf, strategy)
@@ -270,6 +291,38 @@ for _, strategy in helpers.each_strategy() do
       assert.is_false(db.connector:get_stored_connection().ssl)
 
       db:close()
+    end)
+
+    maria_only("returns a connection when using cosockets", function()
+      ngx.IS_CLI = false
+
+      local db, err = DB.new(helpers.test_conf, strategy)
+      assert.is_nil(err)
+      assert.is_table(db)
+
+      assert(db:init_connector())
+
+      local conn, err = db:connect()
+      assert.is_nil(err)
+      assert.is_table(conn)
+
+      db:close(conn)
+    end)
+
+    maria_only("returns a connection when using luasocket", function()
+      ngx.IS_CLI = true
+
+      local db, err = DB.new(helpers.test_conf, strategy)
+      assert.is_nil(err)
+      assert.is_table(db)
+
+      assert(db:init_connector())
+
+      local conn, err = db:connect()
+      assert.is_nil(err)
+      assert.is_table(conn)
+
+      db:close(conn)
     end)
 
     postgres_only("returns opened connection with ssl (cosockets)", function()
@@ -338,7 +391,7 @@ for _, strategy in helpers.each_strategy() do
       helpers.get_db_utils(strategy, {})
     end)
 
-    it("returns true when there is a stored connection (cosockets)", function()
+    postgres_cassandra_only("returns true when there is a stored connection (cosockets)", function()
       ngx.IS_CLI = false
 
       local db, err = DB.new(helpers.test_conf, strategy)
@@ -363,7 +416,7 @@ for _, strategy in helpers.each_strategy() do
       db:close()
     end)
 
-    it("returns true when there is a stored connection (luasocket)", function()
+    postgres_cassandra_only("returns true when there is a stored connection (luasocket)", function()
       ngx.IS_CLI = true
 
       local db, err = DB.new(helpers.test_conf, strategy)
@@ -385,6 +438,42 @@ for _, strategy in helpers.each_strategy() do
 
       assert.is_false(db.connector:get_stored_connection().ssl)
       assert.is_true(db:setkeepalive())
+
+      db:close()
+    end)
+
+    maria_only("returns true when a connection is passed (cosockets)", function()
+      ngx.IS_CLI = false
+
+      local db, err = DB.new(helpers.test_conf, strategy)
+      assert.is_nil(err)
+      assert.is_table(db)
+
+      assert(db:init_connector())
+
+      local conn, err = db:connect()
+      assert.is_nil(err)
+      assert.is_table(conn)
+
+      assert.is_true(db:setkeepalive(conn))
+
+      db:close(conn)
+    end)
+
+    maria_only("returns true when a connection is passed (luasocket)", function()
+      ngx.IS_CLI = true
+
+      local db, err = DB.new(helpers.test_conf, strategy)
+      assert.is_nil(err)
+      assert.is_table(db)
+
+      assert(db:init_connector())
+
+      local conn, err = db:connect()
+      assert.is_nil(err)
+      assert.is_table(conn)
+
+      assert.is_true(db:setkeepalive(conn))
 
       db:close()
     end)
@@ -483,7 +572,7 @@ for _, strategy in helpers.each_strategy() do
       helpers.get_db_utils(strategy, {})
     end)
 
-    it("returns true when there is a stored connection (cosockets)", function()
+    postgres_cassandra_only("returns true when there is a stored connection (cosockets)", function()
       ngx.IS_CLI = false
 
       local db, err = DB.new(helpers.test_conf, strategy)
@@ -506,7 +595,7 @@ for _, strategy in helpers.each_strategy() do
       assert.is_true(db:close())
     end)
 
-    it("returns true when there is a stored connection (luasocket)", function()
+    postgres_cassandra_only("returns true when there is a stored connection (luasocket)", function()
       ngx.IS_CLI = true
 
       local db, err = DB.new(helpers.test_conf, strategy)
@@ -526,6 +615,38 @@ for _, strategy in helpers.each_strategy() do
       end
 
       assert.is_false(db.connector:get_stored_connection().ssl)
+      assert.is_true(db:close())
+    end)
+
+    maria_only("returns true when a connection is passed (cosockets)", function()
+      ngx.IS_CLI = false
+
+      local db, err = DB.new(helpers.test_conf, strategy)
+      assert.is_nil(err)
+      assert.is_table(db)
+
+      assert(db:init_connector())
+
+      local conn, err = db:connect()
+      assert.is_nil(err)
+      assert.is_table(conn)
+
+      assert.is_true(db:close())
+    end)
+
+    maria_only("returns true when a connection is passed (luasocket)", function()
+      ngx.IS_CLI = true
+
+      local db, err = DB.new(helpers.test_conf, strategy)
+      assert.is_nil(err)
+      assert.is_table(db)
+
+      assert(db:init_connector())
+
+      local conn, err = db:connect()
+      assert.is_nil(err)
+      assert.is_table(conn)
+
       assert.is_true(db:close())
     end)
 

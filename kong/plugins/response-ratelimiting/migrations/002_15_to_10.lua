@@ -41,4 +41,25 @@ return {
       ]]))
     end,
   },
+
+  maria = {
+    up = [[
+    ]],
+
+    teardown = function(connector)
+      assert(connector:connect_migrations())
+      assert(connector:query [[
+        BEGIN NOT ATOMIC
+        DECLARE `no_such_table` CONDITION FOR SQLSTATE '42S02';
+        DECLARE EXIT HANDLER FOR `no_such_table`
+          BEGIN
+            -- Do nothing, accept existing state
+          END;
+        ALTER TABLE `response_ratelimiting_metrics` DROP PRIMARY KEY;
+        ALTER TABLE `response_ratelimiting_metrics` ADD PRIMARY KEY (`identifier`, `period`, `period_date`, `service_id`, `route_id`);
+        ALTER TABLE `response_ratelimiting_metrics` DROP COLUMN IF EXISTS `api_id`;
+        END;
+      ]])
+    end,
+  },
 }

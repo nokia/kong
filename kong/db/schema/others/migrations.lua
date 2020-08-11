@@ -10,5 +10,6 @@ return {
     { name      = { type = "string", required = true } },
     { postgres  = { type = "record", required = true, fields = strat_migration } },
     { cassandra = { type = "record", required = true, fields = strat_migration } },
+    { maria     = { type = "record", required = true, fields = strat_migration } },
   },
 }

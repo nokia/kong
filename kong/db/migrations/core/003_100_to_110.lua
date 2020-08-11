@@ -217,4 +217,111 @@ return {
 
     ]],
   },
+
+  maria = {
+    up = [[
+
+      UPDATE `upstreams` SET `created_at` = CAST(`created_at` AS DATETIME(0));
+
+      BEGIN NOT ATOMIC
+        DECLARE `no_such_table` CONDITION FOR SQLSTATE '42S02';
+        DECLARE EXIT HANDLER FOR `no_such_table`
+          BEGIN
+            -- Do nothing, accept existing state
+          END;
+        ALTER TABLE `plugins` ADD COLUMN IF NOT EXISTS `protocols` JSON;
+      END;
+
+      CREATE TABLE IF NOT EXISTS `tags` (
+        `entity_id`         VARCHAR(36),
+        `entity_name`       VARCHAR(255),
+        `tags`              JSON,
+
+        PRIMARY KEY (`entity_id`)
+      ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
+      CREATE INDEX IF NOT EXISTS `tags_entity_name_idx` ON `tags` (`entity_name`);
+
+      BEGIN NOT ATOMIC
+        DECLARE `no_such_table` CONDITION FOR SQLSTATE '42S02';
+        DECLARE EXIT HANDLER FOR `no_such_table`
+          BEGIN
+            -- Do nothing, accept existing state
+          END;
+        ALTER TABLE `services` ADD COLUMN IF NOT EXISTS `tags` JSON;
+      END;
+
+
+      BEGIN NOT ATOMIC
+        DECLARE `no_such_table` CONDITION FOR SQLSTATE '42S02';
+        DECLARE EXIT HANDLER FOR `no_such_table`
+          BEGIN
+            -- Do nothing, accept existing state
+          END;
+        ALTER TABLE `routes` ADD COLUMN IF NOT EXISTS `tags` JSON;
+      END;
+
+
+      BEGIN NOT ATOMIC
+        DECLARE `no_such_table` CONDITION FOR SQLSTATE '42S02';
+        DECLARE EXIT HANDLER FOR `no_such_table`
+          BEGIN
+            -- Do nothing, accept existing state
+          END;
+        ALTER TABLE `certificates` ADD COLUMN IF NOT EXISTS `tags` JSON;
+      END;
+
+
+      BEGIN NOT ATOMIC
+        DECLARE `no_such_table` CONDITION FOR SQLSTATE '42S02';
+        DECLARE EXIT HANDLER FOR `no_such_table`
+          BEGIN
+            -- Do nothing, accept existing state
+          END;
+        ALTER TABLE `snis` ADD COLUMN IF NOT EXISTS `tags` JSON;
+      END;
+
+
+      BEGIN NOT ATOMIC
+        DECLARE `no_such_table` CONDITION FOR SQLSTATE '42S02';
+        DECLARE EXIT HANDLER FOR `no_such_table`
+          BEGIN
+            -- Do nothing, accept existing state
+          END;
+        ALTER TABLE `consumers` ADD COLUMN IF NOT EXISTS `tags` JSON;
+      END;
+
+
+      BEGIN NOT ATOMIC
+        DECLARE `no_such_table` CONDITION FOR SQLSTATE '42S02';
+        DECLARE EXIT HANDLER FOR `no_such_table`
+          BEGIN
+            -- Do nothing, accept existing state
+          END;
+        ALTER TABLE `plugins` ADD COLUMN IF NOT EXISTS `tags` JSON;
+      END;
+
+
+      BEGIN NOT ATOMIC
+        DECLARE `no_such_table` CONDITION FOR SQLSTATE '42S02';
+        DECLARE EXIT HANDLER FOR `no_such_table`
+          BEGIN
+            -- Do nothing, accept existing state
+          END;
+        ALTER TABLE `upstreams` ADD COLUMN IF NOT EXISTS `tags` JSON;
+      END;
+
+
+      BEGIN NOT ATOMIC
+        DECLARE `no_such_table` CONDITION FOR SQLSTATE '42S02';
+        DECLARE EXIT HANDLER FOR `no_such_table`
+          BEGIN
+            -- Do nothing, accept existing state
+          END;
+        ALTER TABLE `targets` ADD COLUMN IF NOT EXISTS `tags` JSON;
+      END;
+
+
+    ]],
+  },
 }

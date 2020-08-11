@@ -128,6 +128,9 @@ return {
     CASSANDRA = {
       MIN = "2.2",
       -- also accepts a DEPRECATED key
+    },
+    MARIA = {
+      MIN = "10.3.17",
     }
   },
   PROTOCOLS = protocols,

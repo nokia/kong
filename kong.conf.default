@@ -435,6 +435,33 @@
                                  # See the `lua_ssl_trusted_certificate`
                                  # setting to specify a certificate authority.
 
+#maria_host = 127.0.0.1          # The MariaDB host to connect to.
+#maria_port = 3306               # The port to connect to.
+#maria_database = kong           # The database name to connect to.
+#maria_timeout = 10000           # Defines the timeout (in ms), for connecting,
+                                 # reading and writing.
+#maria_user = kong               # The username to authenticate if required.
+#maria_password = kong           # The password to authenticate if required.
+
+#maria_ssl = off                 # Toggles client-server TLS connections
+
+#maria_ssl_verify = off          # Toggles server certificate verification if
+                                 # `maria_ssl` is enabled.
+                                 # See the `lua_ssl_trusted_certificate`
+                                 # setting to specify a certificate authority.
+
+#maria_socket_pool_size = 20     # Specifies the size limit for every cosocket
+                                 # connection pool associated with every
+                                 # nginx worker process.
+
+#maria_socket_keepalive_timeout = 60000  # This directive controls the default
+                                         # maximal idle time (in ms) of the
+                                         # connections in the cosocket built-in
+                                         # connection pool.
+                                         # When this timeout reaches, idle
+                                         # connections will be closed and
+                                         # removed from the pool.
+
 #cassandra_contact_points = 127.0.0.1  # A comma-separated list of contact
                                        # points to your cluster.
                                        # You may specify IP addresses or

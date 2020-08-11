@@ -125,6 +125,10 @@ function _M:get(key, opts, cb, ...)
 
   local v, err = self.mlcache:get(key, opts, cb, ...)
   if err then
+    if type(err) == "table" then
+      err = err.message
+    end
+
     return nil, "failed to get from node cache: " .. err
   end
 
