@@ -495,9 +495,14 @@ local function check_and_infer(conf)
   return #errors == 0, errors[1], errors
 end
 
+local function escape_password(pwd)
+  return string.gsub(pwd, "#", [[\#]])
+end
+
 
 local function overrides(k, default_v, file_conf, arg_conf)
   local value -- definitive value for this property
+  local escape -- whether to escape a value's octothorpes
 
   -- default values have lowest priority
 
@@ -521,11 +526,29 @@ local function overrides(k, default_v, file_conf, arg_conf)
 
     log.debug('%s ENV found with "%s"', env_name, to_print)
     value = env
+    escape = true
   end
 
   -- arg_conf have highest priority
   if arg_conf and arg_conf[k] ~= nil then
     value = arg_conf[k]
+    escape = true
+  end
+
+  if escape and type(value) == "string" then
+    if CONF_SENSITIVE[k] then
+      -- escape every instance of # unconditionally, even if preceded with \
+      -- this ensures that passwords provided in config are not modified in any way
+      -- so "foo\#" is foo + backslash + # instead of foo + escaped #
+      value = escape_password(value)
+    else
+      -- Escape "#" in env vars or overrides to avoid them being mangled by
+      -- comments stripping logic.
+      repeat
+        local s, n = string.gsub(value, [[([^\])#]], [[%1\#]])
+        value = s
+      until n == 0
+    end
   end
 
   return value, k
