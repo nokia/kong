@@ -79,6 +79,7 @@ local concurrency = require "kong.concurrency"
 local plugins_iterator = require "kong.runloop.plugins_iterator"
 local balancer_execute = require("kong.runloop.balancer").execute
 local kong_error_handlers = require "kong.error_handlers"
+local topology_coordinator = require "kong.tools.cassandra_cluster_topology_coordinator"
 
 local kong             = kong
 local ngx              = ngx
@@ -551,6 +552,17 @@ function Kong.init_worker()
     plugin.handler:init_worker()
 
     kong_global.reset_log(kong)
+  end
+
+  -- Add timer which will periodically check cassandra cluster topology
+  -- and refresh existing list of Cassandra nodes if something has changed.
+  -- This implementation is specyfic for Cassandra database.
+  if kong.configuration.database == "cassandra" and kong.configuration.cassandra_cluster_refresh_interval > 0 then
+    local ok, err = ngx.timer.every(kong.configuration.cassandra_cluster_refresh_interval,
+                                    topology_coordinator.refresh_cluster_topology)
+    if not ok then
+      ngx.log(ngx.ERR, "Failed to start Cassandra topology coordinator in background thread: " .. err)
+    end
   end
 end
 

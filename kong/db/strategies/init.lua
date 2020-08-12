@@ -15,7 +15,7 @@ _M.STRATEGIES   = {
 }
 
 
-function _M.new(kong_config, database, schemas, errors)
+function _M.new(kong_config, database, schemas, errors, shm_name)
   local database = database or kong_config.database
 
   if not _M.STRATEGIES[database] then
@@ -28,7 +28,7 @@ function _M.new(kong_config, database, schemas, errors)
   -- strategy-specific automated CRUD query builder with :insert() :select()
   local Strategy = require(fmt("kong.db.strategies.%s", database))
 
-  local connector, err = Connector.new(kong_config)
+  local connector, err = Connector.new(kong_config, shm_name)
   if not connector then
     return nil, nil, err
   end

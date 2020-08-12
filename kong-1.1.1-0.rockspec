@@ -20,7 +20,7 @@ dependencies = {
   "multipart == 0.5.5",
   "version == 1.0.1",
   "kong-lapis == 1.6.0.1",
-  "lua-cassandra == 1.3.4",
+  "nokia-fork-lua-cassandra == 1.3.4-1",
   "pgmoon == 1.9.0",
   "luatz == 0.3",
   "http == 0.3",
@@ -114,12 +114,14 @@ build = {
     ["kong.api.routes.certificates"] = "kong/api/routes/certificates.lua",
     ["kong.api.routes.snis"] = "kong/api/routes/snis.lua",
     ["kong.api.routes.tags"] = "kong/api/routes/tags.lua",
+    ["kong.api.routes.utils"] = "kong/api/routes/utils.lua",
 
     ["kong.tools.cluster_ca"] = "kong/tools/cluster_ca.lua",
     ["kong.tools.dns"] = "kong/tools/dns.lua",
     ["kong.tools.utils"] = "kong/tools/utils.lua",
     ["kong.tools.printable"] = "kong/tools/printable.lua",
     ["kong.tools.timestamp"] = "kong/tools/timestamp.lua",
+    ["kong.tools.cassandra_cluster_topology_coordinator"] = "kong/tools/cassandra_cluster_topology_coordinator.lua",
     ["kong.tools.maria.utils"] = "kong/tools/maria/utils.lua",
 
     ["kong.runloop.handler"] = "kong/runloop/handler.lua",

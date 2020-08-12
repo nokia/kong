@@ -531,6 +531,15 @@ return {
       end, "balancer", "upstreams")
 
 
+      -- worker_event to invoke loadbalancer refresh
+      worker_events.register(function(data)
+        local ok, err = db.connector:refresh_load_balancer()
+        if err then
+          ngx.log(ngx.ERR, "Failed to refresh loadbalancer.")
+        end
+      end, "loadbalancer", "refresh")
+
+
       cluster_events:subscribe("balancer:upstreams", function(data)
         local operation, id, name = unpack(utils.split(data, ":"))
         -- => to worker_events node handler

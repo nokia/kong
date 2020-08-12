@@ -5,6 +5,7 @@ user ${{NGINX_USER}};
 worker_processes ${{NGINX_WORKER_PROCESSES}};
 daemon ${{NGINX_DAEMON}};
 
+env KONG_CASSANDRA_CONTACT_POINTS_ORIGIN;
 env CCAS_ADDRESS_FAMILY;
 
 pid pids/nginx.pid;

@@ -25,7 +25,7 @@ DB.__index = function(self, k)
 end
 
 
-function DB.new(kong_config, strategy)
+function DB.new(kong_config, strategy, shm_name)
   if not kong_config then
     error("missing kong_config", 2)
   end
@@ -68,7 +68,7 @@ function DB.new(kong_config, strategy)
   -- load strategy
 
   local connector, strategies, err = Strategies.new(kong_config, strategy,
-                                                    schemas, errors)
+                                                    schemas, errors, shm_name)
   if err then
     return nil, err
   end

@@ -548,6 +548,12 @@
                                              # This value is only used during
                                              # migrations.
 
+#cassandra_cluster_refresh_interval = 15  # Defines the timer (in seconds) which
+                                          # will periodically check cassandra
+                                          # cluster topology and refresh existing
+                                          # list of Cassandra nodes if something
+                                          # has changed.
+
 #------------------------------------------------------------------------------
 # DATASTORE CACHE
 #------------------------------------------------------------------------------

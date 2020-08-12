@@ -37,8 +37,11 @@ lua_shared_dict kong_cluster_events 5m;
 lua_shared_dict kong_healthchecks   5m;
 lua_shared_dict kong_rate_limiting_counters 12m;
 > if database == "cassandra" then
-lua_shared_dict kong_cassandra      5m;
+lua_shared_dict kong_cassandra            5m;
+lua_shared_dict kong_cassandra_temp       5m;
+lua_shared_dict topology_coordinator_lock 1m;
 > end
+lua_shared_dict query_lock 100k;
 lua_socket_log_errors off;
 > if lua_ssl_trusted_certificate then
 lua_ssl_trusted_certificate '${{LUA_SSL_TRUSTED_CERTIFICATE}}';

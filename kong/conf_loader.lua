@@ -162,6 +162,7 @@ local CONF_INFERENCES = {
   cassandra_repl_factor = { typ = "number" },
   cassandra_data_centers = { typ = "array" },
   cassandra_schema_consensus_timeout = { typ = "number" },
+  cassandra_cluster_refresh_interval = {typ = "number"},
 
   dns_resolver = { typ = "array" },
   dns_hostsfile = { typ = "string" },

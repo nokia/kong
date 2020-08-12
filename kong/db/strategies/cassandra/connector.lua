@@ -8,7 +8,7 @@ local CassandraConnector   = {}
 CassandraConnector.__index = CassandraConnector
 
 
-function CassandraConnector.new(kong_config)
+function CassandraConnector.new(kong_config, shm_name)
   local resolved_contact_points = {}
 
   do
@@ -31,10 +31,23 @@ function CassandraConnector.new(kong_config)
 
     local dns_no_sync_old = kong_config.dns_no_sync
 
-    package.loaded["socket"] = nil
-    package.loaded["kong.tools.dns"] = nil
-    package.loaded["resty.dns.client"] = nil
-    package.loaded["resty.dns.resolver"] = nil
+    -- This change is caused by a huge memory usage while creating the kong's DB object
+    -- every 15 seconds by kong.tools.cassandra_cluster_topology_coordinator.
+    -- DB object creates new instance of CassandraConnector and here the following modules
+    -- are forced to be reloaded (this is causing the memory usage increase).
+    -- We don't need DNS in our case because all contact points to cassandra nodes are
+    -- given by IP. On the other hand, cassandra_cluster_topology_coordinator is started by
+    -- ngx.timer where kong's hack shouldn't be needed so it should work for domain names.
+    -- https://github.com/openresty/lua-nginx-module#cosockets-not-available-everywhere
+    -- https://github.com/openresty/lua-nginx-module#ngxtimerat
+    -- Only cassandra_cluster_topology_coordinator sets shm_name, so we are sure here that kong's
+    -- hack is not needed then.
+    if not shm_name then
+      package.loaded["socket"] = nil
+      package.loaded["kong.tools.dns"] = nil
+      package.loaded["resty.dns.client"] = nil
+      package.loaded["resty.dns.resolver"] = nil
+    end
 
     local ccas_address_family = os.getenv("CCAS_ADDRESS_FAMILY")
     if ccas_address_family == nil then
@@ -121,10 +134,23 @@ function CassandraConnector.new(kong_config)
 
     kong_config.dns_no_sync = dns_no_sync_old
 
-    package.loaded["resty.dns.resolver"] = nil
-    package.loaded["resty.dns.client"] = nil
-    package.loaded["kong.tools.dns"] = nil
-    package.loaded["socket"] = nil
+    -- This change is caused by a huge memory usage while creating the kong's DB object
+    -- every 15 seconds by kong.tools.cassandra_cluster_topology_coordinator.
+    -- DB object creates new instance of CassandraConnector and here the following modules
+    -- are forced to be reloaded (this is causing the memory usage increase).
+    -- We don't need DNS in our case because all contact points to cassandra nodes are
+    -- given by IP. On the other hand, cassandra_cluster_topology_coordinator is started by
+    -- ngx.timer where kong's hack shouldn't be needed so it should work for domain names.
+    -- https://github.com/openresty/lua-nginx-module#cosockets-not-available-everywhere
+    -- https://github.com/openresty/lua-nginx-module#ngxtimerat
+    -- Only cassandra_cluster_topology_coordinator sets shm_name, so we are sure here that kong's
+    -- hack is not needed then.
+    if not shm_name then
+      package.loaded["resty.dns.resolver"] = nil
+      package.loaded["resty.dns.client"] = nil
+      package.loaded["kong.tools.dns"] = nil
+      package.loaded["socket"] = nil
+    end
 
     ngx.socket.udp = udp_old
     ngx.socket.tcp = tcp_old
@@ -150,6 +176,13 @@ function CassandraConnector.new(kong_config)
     lock_timeout              = 30,
     silent                    = ngx.IS_CLI,
   }
+
+  -- changing default lua shared dict name that will be used to store
+  -- informations about Cassandra cluster topology
+  if shm_name then
+    cluster_options.shm = shm_name
+    ngx.log(ngx.DEBUG, "[connector.lua] cluster_options.shm changed to: " .. tostring(shm_name))
+  end
 
   if ngx.IS_CLI then
     local policy = require("resty.cassandra.policies.reconnection.const")
@@ -1255,6 +1288,13 @@ do
 
     return res
   end
+end
+
+
+-- function which will initialize loadbalancer in cluster.lua object
+-- using Cassandra peers stored in shared memory
+function CassandraConnector:refresh_load_balancer()
+  return self.cluster:refresh_load_balancer()
 end
 
 
