@@ -8,9 +8,9 @@ admin_error_log = logs/error.log
 plugins = bundled
 anonymous_reports = on
 
-proxy_listen = 0.0.0.0:8000, 0.0.0.0:8443 ssl
+proxy_listen = 0.0.0.0:8000, 0.0.0.0:8443 ssl, [::]:8000, [::]:8443 ssl
 stream_listen = off
-admin_listen = 127.0.0.1:8001, 127.0.0.1:8444 ssl
+admin_listen = 127.0.0.1:8001, 127.0.0.1:8444 ssl, [::1]:8001, [::1]:8444 ssl
 origins = NONE
 nginx_user = nobody nobody
 nginx_worker_processes = auto
@@ -79,7 +79,7 @@ db_resurrect_ttl = 30
 
 dns_resolver = NONE
 dns_hostsfile = /etc/hosts
-dns_order = LAST,SRV,A,CNAME
+dns_order = LAST,SRV,A,CNAME,AAAA
 dns_valid_ttl = NONE
 dns_stale_ttl = 4
 dns_not_found_ttl = 30

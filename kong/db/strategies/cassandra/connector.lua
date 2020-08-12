@@ -36,8 +36,15 @@ function CassandraConnector.new(kong_config)
     package.loaded["resty.dns.client"] = nil
     package.loaded["resty.dns.resolver"] = nil
 
+    local ccas_address_family = os.getenv("CCAS_ADDRESS_FAMILY")
+    if ccas_address_family == nil then
+      ccas_address_family = ""
+    end
     ngx.socket.tcp = function(...)
       local tcp = require("socket").tcp(...)
+      if ccas_address_family:lower() == "ipv6" then
+        tcp = require("socket").tcp6(...)
+      end
       return setmetatable({}, {
         __newindex = function(_, k, v)
           tcp[k] = v
@@ -65,6 +72,9 @@ function CassandraConnector.new(kong_config)
 
     ngx.socket.udp = function(...)
       local udp = require("socket").udp(...)
+      if ccas_address_family:lower() == "ipv6" then
+        udp = require("socket").udp6(...)
+      end
       return setmetatable({}, {
         __newindex = function(_, k, v)
           udp[k] = v
@@ -103,6 +113,7 @@ function CassandraConnector.new(kong_config)
                   cp, err)
 
       else
+        ip = string.gsub(ip, "%[*%]*", "")
         log.debug("resolved Cassandra contact point '%s' to: %s", cp, ip)
         resolved_contact_points[i] = ip
       end
@@ -756,7 +767,7 @@ do
 
       for _, row in ipairs(rows) do
         -- Cassandra 3: table_name
-        -- Cassadra 2: columnfamily_name
+        -- Cassandra 2: columnfamily_name
         if row.table_name == "schema_meta"
           or row.columnfamily_name == "schema_meta" then
           has_schema_meta_table = true
