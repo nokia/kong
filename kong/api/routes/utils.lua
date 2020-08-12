@@ -30,4 +30,14 @@ return {
             end
         end
     },
+    ["/utils/openapi"] = {
+        GET = function(self, db, helpers)
+            local file = io.open(kong.configuration.prefix .. "/admin_api_spec.yaml", "r")
+            local body = file:read("*all")
+            file:close()
+            local headers = {}
+            headers["Content-Type"] = "text/plain"
+            return kong.response.exit(ngx.HTTP_OK, body, headers)
+        end
+    },
 }

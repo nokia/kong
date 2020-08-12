@@ -1,0 +1,3567 @@
+# © 2020 Nokia
+# Licensed under the Apache License 2.0
+# SPDX-License-Identifier: Apache-2.0
+
+swagger: "2.0"
+info:
+  description: "Kong comes with an internal RESTful Admin API for administration purposes. Requests to the Admin API can be sent to any node in the cluster, and Kong will keep the configuration consistent across all nodes."
+  version: "1.1.x"
+  title: "Kong's Admin REST API"
+host: "localhost:8001"
+basePath: "/"
+schemes:
+- "https"
+- "http"
+paths:
+  /:
+    get:
+      description: "Retrieve generic details about a node"
+      operationId: "getNodeInformation"
+      parameters: []
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Generic details about a node."
+          schema:
+            $ref: "#/definitions/NodeInformationModel"
+        500:
+          description: "Internal Server Error"
+      summary: "Generic node details."
+  /certificates:
+    get:
+      description: ""
+      operationId: "getCertificates"
+      parameters:
+      - name: "tags"
+        in: "query"
+        description: "Optional tags, used to filter results."
+        required: false
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/CertificateCollectionModel"
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "List all Certificates."
+    post:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "postCertificate"
+      parameters:
+      - description: "Parameters of a new Certificate that needs to be added."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/CertificateInputModel"
+      produces:
+      - "application/json"
+      responses:
+        201:
+          description: "HTTP 201 Created. Resource successfully created."
+          schema:
+            $ref: "#/definitions/CertificateOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create Certificate."
+  /certificates/{id}:
+    get:
+      description: ""
+      operationId: "getCertificate"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Certificate to retrieve."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/CertificateOutputModel"
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Retrieve Certificate."
+    put:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "putCertificate"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Certificate to create or update."
+        required: true
+        type: "string"
+      - description: "Parameters of the Certificate that needs to be created or updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/CertificateInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/CertificateOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create or update Certificate."
+    delete:
+      description: ""
+      operationId: "deleteCertificate"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Certificate to delete."
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "HTTP 204 No Content. Request successful, no content to show."
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Delete certificate."
+    patch:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "patchCertificate"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Certificate to update."
+        required: true
+        type: "string"
+      - description: "Parameters of the Certificate that needs to be updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/CertificateInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/CertificateOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Update Certificate."
+  /certificates/{name_or_id}/snis:
+    get:
+      description: ""
+      operationId: "getSnisByCertificateId"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name attribute of the Certificate\
+          \ whose SNIs are to be retrieved. When using this endpoint, only SNIs associated\
+          \ to the specified Certificate will be listed."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/SniCollectionModel"
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "List SNIs associated to a specific Certificate."
+    post:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "postSniByCertificateId"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name attribute of the Certificate\
+          \ that should be associated to the newly-created SNI.."
+        required: true
+        type: "string"
+      - description: "Parameters of a new SNI that needs to be added."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/SniInputModel"
+      produces:
+      - "application/json"
+      responses:
+        201:
+          description: "HTTP 201 Created. Resource successfully created."
+          schema:
+            $ref: "#/definitions/SniOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create SNI associated to a specific Certificate."
+  /consumers:
+    get:
+      description: ""
+      operationId: "getConsumers"
+      parameters:
+      - name: "tags"
+        in: "query"
+        description: "Optional tags, used to filter results."
+        required: false
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/ConsumerCollectionModel"
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "List all Consumers."
+    post:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "postConsumer"
+      parameters:
+      - description: "Parameters of the Consumer that needs to be created."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/ConsumerInputModel"
+      produces:
+      - "application/json"
+      responses:
+        201:
+          description: "HTTP 201 Created. Resource successfully created."
+          schema:
+            $ref: "#/definitions/ConsumerOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create consumer."
+  /consumers/{id}/plugins:
+    get:
+      description: ""
+      operationId: "getPluginsByConsumerId"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Consumer whose Plugins are to be\
+          \ retrieved. When using this endpoint, only Plugins associated to the specified\
+          \ Consumer will be listed."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 201 Created. Resource successfully created."
+          schema:
+            $ref: "#/definitions/PluginCollectionModel"
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "List Plugins associated to a specific Consumer."
+    post:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "postPluginByConsumerId"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Consumer that should be associated\
+          \ to the newly-created Plugin."
+        required: true
+        type: "string"
+      - description: "Parameters of the Plugin that needs to be added."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/PluginInputModel"
+      produces:
+      - "application/json"
+      responses:
+        201:
+          description: "HTTP 201 Created. Resource successfully created."
+          schema:
+            $ref: "#/definitions/PluginOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create Plugin associated to a specific Consumer."
+  /consumers/{username_or_id}:
+    get:
+      description: ""
+      operationId: "getConsumer"
+      parameters:
+      - name: "username_or_id"
+        in: "path"
+        description: "The unique identifier or the username of the Consumer to retrieve."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        201:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/ConsumerOutputModel"
+        400:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Retrieve Consumer."
+    put:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "putConsumer"
+      parameters:
+      - name: "username_or_id"
+        in: "path"
+        description: "The unique identifier or the username of the Consumer to create\
+          \ or update."
+        required: true
+        type: "string"
+      - description: "Parameters of the Consumer that needs to be created or updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/ConsumerInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/ConsumerOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create or update Consumer."
+    delete:
+      description: ""
+      operationId: "deleteConsumer"
+      parameters:
+      - name: "username_or_id"
+        in: "path"
+        description: "The unique identifier or the username of the Consumer to delete."
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "HTTP 204 No Content. Request successful, no content to show."
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Delete Consumer."
+    patch:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "patchConsumer"
+      parameters:
+      - name: "username_or_id"
+        in: "path"
+        description: "The unique identifier or the username of the Consumer to update."
+        required: true
+        type: "string"
+      - description: "Parameters of the consumer that needs to be updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/ConsumerInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/ConsumerOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Update consumer."
+  /plugins:
+    get:
+      description: ""
+      operationId: "getPlugins"
+      parameters:
+      - name: "tags"
+        in: "query"
+        description: "Optional tags, used to filter results."
+        required: false
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 201 Created. Resource successfully created."
+          schema:
+            $ref: "#/definitions/PluginCollectionModel"
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "List all Plugins."
+    post:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "postPlugin"
+      parameters:
+      - description: "Parameters of the Plugin that needs to be added."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/PluginInputModel"
+      produces:
+      - "application/json"
+      responses:
+        201:
+          description: "HTTP 201 Created. Resource successfully created."
+          schema:
+            $ref: "#/definitions/PluginOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create Plugin."
+  /plugins/enabled:
+    get:
+      description: ""
+      operationId: "getEnabledPlugins"
+      parameters: []
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Retrieve a list of all installed plugins on the Kong node."
+  /plugins/schema/{plugin_name}:
+    get:
+      description: ""
+      operationId: "getPluginSchemaByName"
+      parameters:
+      - name: "plugin_name"
+        in: "path"
+        description: "The name of the Plugin."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Retrieve the schema of a plugin's configuration."
+  /plugins/{id}:
+    get:
+      description: ""
+      operationId: "getPlugin"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Plugin to retrieve."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/PluginOutputModel"
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Retrieve Plugin."
+    put:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "putPlugin"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Plugin to create or update."
+        required: true
+        type: "string"
+      - description: "Parameters of the plugin that needs to be created or updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/PluginInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/PluginOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create or update Plugin."
+    delete:
+      description: ""
+      operationId: "deletePlugin"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Plugin to delete."
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "HTTP 204 No Content. Request successful, no content to show."
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Delete plugin."
+    patch:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "patchPlugin"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Plugin to update."
+        required: true
+        type: "string"
+      - description: "Parameters of the Plugin that needs to be updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/PluginInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/PluginOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Update Plugin."
+  /plugins/{id}/consumer:
+    get:
+      description: ""
+      operationId: "getConsumerByPluginId"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Plugin associated to the Consumer\
+          \ to be retrieved."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/ConsumerOutputModel"
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Retrieve Consumer associated to a specific Plugin."
+    put:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "putConsumerByPluginId"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Plugin associated to the Route\
+          \ to be created or updated."
+        required: true
+        type: "string"
+      - description: "Parameters of the Route that needs to be created or updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/ConsumerInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/ConsumerOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create or update Consumer associated to a specific Plugin."
+    patch:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "patchConsumerByPluginId"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Plugin associated to the Consumer\
+          \ to be updated."
+        required: true
+        type: "string"
+      - description: "Parameters of the Consumer that needs to be updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/ConsumerInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/ConsumerOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Update Consumer associated to a specific Plugin."
+  /plugins/{id}/route:
+    get:
+      description: ""
+      operationId: "getRouteByPluginId"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Plugin associated to the Route\
+          \ to be retrieved."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/RouteOutputModel"
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Retrieve Route associated to a specific Plugin."
+    put:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "putRouteByPluginId"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Plugin associated to the Route\
+          \ to be created or updated."
+        required: true
+        type: "string"
+      - description: "Parameters of the Route that needs to be created or updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/RouteInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/RouteOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create or update Route associated to a specific Plugin."
+    patch:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "patchRouteByPluginId"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Plugin associated to the Route\
+          \ to be updated."
+        required: true
+        type: "string"
+      - description: "Parameters of the Route that needs to be updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/RouteInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/RouteOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Update Route associated to a specific Plugin."
+  /plugins/{id}/service:
+    get:
+      description: ""
+      operationId: "getServiceByPluginId"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Plugin associated to the Service\
+          \ to be retrieved."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/ServiceOutputModel"
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Retrieve Service associated to a specific Plugin."
+    put:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "putServiceByPluginId"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Plugin associated to the Service\
+          \ to be created or updated."
+        required: true
+        type: "string"
+      - description: "Parameters of the service that needs to be created or updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/ServiceInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/ServiceOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create or update Service associated to a specific Plugin."
+    patch:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "patchServiceByPluginId"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Plugin associated to the Service\
+          \ to be updated."
+        required: true
+        type: "string"
+      - description: "Parameters of the service that needs to be updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/ServiceInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/ServiceOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Update Service associated to a specific Plugin."
+  /routes:
+    get:
+      description: ""
+      operationId: "getRoutes"
+      parameters:
+      - name: "tags"
+        in: "query"
+        description: "Optional tags, used to filter results."
+        required: false
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/RouteCollectionModel"
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "List all Routes."
+    post:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "postRoute"
+      parameters:
+      - description: "Parameters of a new route that needs to be added."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/RouteInputModel"
+      produces:
+      - "application/json"
+      responses:
+        201:
+          description: "HTTP 201 Created. Resource successfully created."
+          schema:
+            $ref: "#/definitions/RouteOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create Route."
+  /routes/{id}/plugins:
+    get:
+      description: ""
+      operationId: "getPluginsByRouteId"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Route whose Plugins are to be retrieved.\
+          \ When using this endpoint, only Plugins associated to the specified Route\
+          \ will be listed."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 201 Created. Resource successfully created."
+          schema:
+            $ref: "#/definitions/PluginCollectionModel"
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "List Plugins associated to a specific Route."
+    post:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "postPluginByRouteId"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Route that should be associated\
+          \ to the newly-created Plugin."
+        required: true
+        type: "string"
+      - description: "Parameters of the Plugin that needs to be added."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/PluginInputModel"
+      produces:
+      - "application/json"
+      responses:
+        201:
+          description: "HTTP 201 Created. Resource successfully created."
+          schema:
+            $ref: "#/definitions/PluginOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create Plugin associated to a specific Route."
+  /routes/{name_or_id}:
+    get:
+      description: ""
+      operationId: "getRoute"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the Route to retrieve."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/RouteOutputModel"
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Retrieve Route."
+    put:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "putRoute"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the Route to create or\
+          \ update."
+        required: true
+        type: "string"
+      - description: "Parameters of the Route that needs to be created or updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/RouteInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/RouteOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create or update Route."
+    delete:
+      description: ""
+      operationId: "deleteRoute"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the Route to delete."
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "HTTP 204 No Content. Request successful, no content to show."
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Delete Route."
+    patch:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "patchRoute"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the Route to update."
+        required: true
+        type: "string"
+      - description: "Parameters of the Route that needs to be updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/RouteInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/RouteOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Update Route."
+  /routes/{name_or_id}/service:
+    get:
+      description: ""
+      operationId: "getServiceByRouteId"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the Route associated to\
+          \ the Service to be retrieved."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/ServiceOutputModel"
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Retrieve Service associated to a specific Route."
+    put:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "putServiceByRouteId"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the Route associated to\
+          \ the Service to be created or updated."
+        required: true
+        type: "string"
+      - description: "Parameters of the service that needs to be created or updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/ServiceInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/ServiceOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create or update Service associated to a specific Route."
+    delete:
+      description: ""
+      operationId: "deleteServiceByRouteId"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the Route associated to\
+          \ the Service to be deleted."
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "HTTP 204 No Content. Request successful, no content to show."
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Delete Service associated to a specific Route."
+    patch:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "patchServiceByRouteId"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the Route associated to\
+          \ the Service to be updated."
+        required: true
+        type: "string"
+      - description: "Parameters of the service that needs to be updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/ServiceInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/ServiceOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Update Service associated to a specific Route."
+  /services:
+    get:
+      description: ""
+      operationId: "getServices"
+      parameters:
+      - name: "tags"
+        in: "query"
+        description: "Optional tags, used to filter results."
+        required: false
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 201 Created. Resource successfully created."
+          schema:
+            $ref: "#/definitions/ServiceCollectionModel"
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "List all Services."
+    post:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "postService"
+      parameters:
+      - description: "Parameters of a new Service that needs to be added."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/ServiceInputModel"
+      produces:
+      - "application/json"
+      responses:
+        201:
+          description: "HTTP 201 Created. Resource successfully created."
+          schema:
+            $ref: "#/definitions/ServiceOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create Service."
+  /services/{id}/plugins:
+    get:
+      description: ""
+      operationId: "getPluginsByServiceId"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Service whose Plugins are to be\
+          \ retrieved. When using this endpoint, only Plugins associated to the specified\
+          \ Service will be listed."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 201 Created. Resource successfully created."
+          schema:
+            $ref: "#/definitions/PluginCollectionModel"
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "List Plugins associated to a specific Service."
+    post:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "postPluginByServiceId"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The unique identifier of the Service that should be associated\
+          \ to the newly-created Plugin."
+        required: true
+        type: "string"
+      - description: "Parameters of the Plugin that needs to be added."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/PluginInputModel"
+      produces:
+      - "application/json"
+      responses:
+        201:
+          description: "HTTP 201 Created. Resource successfully created."
+          schema:
+            $ref: "#/definitions/PluginOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create Plugin associated to a specific Service."
+  /services/{name_or_id}:
+    get:
+      description: ""
+      operationId: "getService"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the Service to retrieve."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/ServiceOutputModel"
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Retrieve Service."
+    put:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "putService"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the Service to create or\
+          \ update."
+        required: true
+        type: "string"
+      - description: "Parameters of the Service that needs to be created or updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/ServiceInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/ServiceOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create or update Service."
+    delete:
+      description: ""
+      operationId: "deleteService"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the Service to delete."
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "HTTP 204 No Content. Request successful, no content to show."
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Delete service."
+    patch:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "patchService"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the Service to update."
+        required: true
+        type: "string"
+      - description: "Parameters of the Service that needs to be updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/ServiceInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/ServiceOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Update Service."
+  /services/{name_or_id}/routes:
+    get:
+      description: ""
+      operationId: "getRoutesByServiceId"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name attribute of the Service whose\
+          \ Routes are to be retrieved. When using this endpoint, only Routes associated\
+          \ to the specified Service will be listed."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/RouteCollectionModel"
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "List Routes associated to a specific Service."
+    post:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "postRouteByServiceId"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name attribute of the Service that\
+          \ should be associated to the newly-created Route."
+        required: true
+        type: "string"
+      - description: "Parameters of a new Route that needs to be added."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/RouteInputModel"
+      produces:
+      - "application/json"
+      responses:
+        201:
+          description: "HTTP 201 Created. Resource successfully created."
+          schema:
+            $ref: "#/definitions/RouteOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create Route associated to a specific Service."
+  /snis:
+    get:
+      description: ""
+      operationId: "getSnis"
+      parameters:
+      - name: "tags"
+        in: "query"
+        description: "Optional tags, used to filter results."
+        required: false
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 201 Created. Resource successfully created."
+          schema:
+            $ref: "#/definitions/SniCollectionModel"
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "List all SNIs."
+    post:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "postSni"
+      parameters:
+      - description: "Parameters of a new SNI that needs to be added."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/SniInputModel"
+      produces:
+      - "application/json"
+      responses:
+        201:
+          description: "HTTP 201 Created. Resource successfully created."
+          schema:
+            $ref: "#/definitions/SniOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create SNI."
+  /snis/{name_or_id}:
+    get:
+      description: ""
+      operationId: "getSni"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the SNI to retrieve."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/SniOutputModel"
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Retrieve SNI."
+    put:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "putSni"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the SNI to create or update."
+        required: true
+        type: "string"
+      - description: "Parameters of the SNI that needs to be created or updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/SniInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/SniOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create or update SNI."
+    delete:
+      description: ""
+      operationId: "deleteSni"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the SNI to delete."
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "HTTP 204 No Content. Request successful, no content to show."
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Delete SNI."
+    patch:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "patchSni"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the SNI to update."
+        required: true
+        type: "string"
+      - description: "Parameters of the SNI that needs to be updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/SniInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/SniOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Update SNI."
+  /status:
+    get:
+      description: "Retrieve usage information about a node, with some basic information\
+        \ about the connections being processed by the underlying nginx process, and\
+        \ the status of the database connection."
+      operationId: "getNodeStatus"
+      parameters: []
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Information about a node."
+          schema:
+            $ref: "#/definitions/NodeStatusModel"
+        500:
+          description: "Internal Server Error"
+      summary: "Node status"
+  /tags:
+    get:
+      description: ""
+      operationId: "getTags"
+      parameters: []
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 201 Created. Resource successfully created."
+          schema:
+            $ref: "#/definitions/TagCollectionModel"
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "List all TAGs."
+  /tags/{name}:
+    get:
+      description: ""
+      operationId: "getTag"
+      parameters:
+      - name: "name"
+        in: "path"
+        description: "The name of the Tag to retrieve."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/TagCollectionModel"
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "List only specyfic TAGs."
+  /targets/{host_port_or_id}/upstream:
+    get:
+      description: ""
+      operationId: "getUpstreamByTargetId"
+      parameters:
+      - name: "host_port_or_id"
+        in: "path"
+        description: "The unique identifier or the host:port of the Target associated\
+          \ to the Upstream to be retrieved."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/UpstreamOutputModel"
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Retrieve Upstream associated to a specific Target."
+    put:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "putUpstreamByTargetId"
+      parameters:
+      - name: "host_port_or_id"
+        in: "path"
+        description: "The unique identifier or the host:port of the Target associated\
+          \ to the Upstream to be created or updated."
+        required: true
+        type: "string"
+      - description: "Parameters of the upstream that needs to be created or updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/UpstreamInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/UpstreamOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create or update Upstream associated to a specific Target."
+    delete:
+      description: ""
+      operationId: "deleteUpstreamByTargetId"
+      parameters:
+      - name: "host_port_or_id"
+        in: "path"
+        description: "The unique identifier or the host:port of the Target associated\
+          \ to the Upstream to be deleted."
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "HTTP 204 No Content. Request successful, no content to show."
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Delete upstream."
+    patch:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "patchUpstreamByTargetId"
+      parameters:
+      - name: "host_port_or_id"
+        in: "path"
+        description: "The unique identifier or the host:port of the Target associated\
+          \ to the Upstream to be updated."
+        required: true
+        type: "string"
+      - description: "Parameters of the Upstream that needs to be updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/UpstreamInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/UpstreamOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Update Upstream associated to a specific Target."
+  /upstreams:
+    get:
+      description: ""
+      operationId: "getUpstreams"
+      parameters:
+      - name: "tags"
+        in: "query"
+        description: "Optional tags, used to filter results."
+        required: false
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/UpstreamCollectionModel"
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "List all Upstreams."
+    post:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "postUpstream"
+      parameters:
+      - description: "Parameters of a new Upstream that needs to be added."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/UpstreamInputModel"
+      produces:
+      - "application/json"
+      responses:
+        201:
+          description: "HTTP 201 Created. Resource successfully created."
+          schema:
+            $ref: "#/definitions/UpstreamOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create Upstream."
+  /upstreams/{name_or_id}:
+    get:
+      description: ""
+      operationId: "getUpstream"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the Upstream to retrieve."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/UpstreamOutputModel"
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Retrieve Upstream."
+    put:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "putUpstream"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the Upstream to create\
+          \ or update."
+        required: true
+        type: "string"
+      - description: "Parameters of the Upstream that needs to be created or updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/UpstreamInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/UpstreamOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create or update Upstream."
+    delete:
+      description: ""
+      operationId: "deleteUpstream"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the Upstream to delete."
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "HTTP 204 No Content. Request successful, no content to show."
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Delete upstream."
+    patch:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "patchUpstream"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the Upstream to update."
+        required: true
+        type: "string"
+      - description: "Parameters of the Upstream that needs to be updated."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/UpstreamInputModel"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/UpstreamOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Update Upstream."
+  /upstreams/{name_or_id}/health:
+    get:
+      description: "Display target health."
+      operationId: "getUpstreamHealth"
+      parameters:
+      - name: "name_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the Upstream for which\
+          \ to display Target health."
+        required: true
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/UpstreamHealthModel"
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: ""
+  /upstreams/{upstream_host_port_or_id}/targets:
+    get:
+      description: ""
+      operationId: "getActiveTargetsByUpstreamId"
+      parameters:
+      - name: "upstream_host_port_or_id"
+        in: "path"
+        description: "The unique identifier or the host:port attribute of the Upstream\
+          \ whose Targets are to be retrieved. When using this endpoint, only Targets\
+          \ associated to the specified Upstream will be listed."
+        required: true
+        type: "string"
+      - name: "tags"
+        in: "query"
+        description: "Optional tags, used to filter results."
+        required: false
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/TargetCollectionModel"
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "List Targets associated to a specific Upstream."
+    post:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "postTargetByUpstreamId"
+      parameters:
+      - name: "upstream_host_port_or_id"
+        in: "path"
+        description: "The unique identifier or the host:port attribute of the Upstream\
+          \ that should be associated to the newly-created Target."
+        required: true
+        type: "string"
+      - description: "Parameters of a new target."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/TargetInputModel"
+      produces:
+      - "application/json"
+      responses:
+        201:
+          description: "HTTP 201 Created. Resource successfully created."
+          schema:
+            $ref: "#/definitions/TargetOutputModel"
+        400:
+          description: "HTTP 400 Bad Request. The request could not be understood\
+            \ by the server due to malformed syntax."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Create Target associated to a specific Upstream."
+  /upstreams/{upstream_host_port_or_id}/targets/all:
+    get:
+      description: ""
+      operationId: "getAllTargetsByUpstreamId"
+      parameters:
+      - name: "upstream_host_port_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the upstream for which\
+          \ to list the targets."
+        required: true
+        type: "string"
+      - name: "tags"
+        in: "query"
+        description: "Optional tags, used to filter results."
+        required: false
+        type: "string"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            $ref: "#/definitions/TargetCollectionModel"
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "List all Targets associated to a specific Upstream."
+  /upstreams/{upstream_host_port_or_id}/targets/{host_port_or_id}:
+    delete:
+      description: ""
+      operationId: "deleteTargetByUpstreamId"
+      parameters:
+      - name: "upstream_host_port_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the upstream for which\
+          \ to delete the target."
+        required: true
+        type: "string"
+      - name: "host_port_or_id"
+        in: "path"
+        description: "The host:port combination element of the target to remove, or\
+          \ the id of an existing target entry."
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "HTTP 204 No Content. Request successful, no content to show."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Delete target associated to a specific Upstream."
+  /upstreams/{upstream_host_port_or_id}/targets/{target_or_id}/healthy:
+    post:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "setTargetAsHealthyByUpstreamId"
+      parameters:
+      - name: "upstream_host_port_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the upstream."
+        required: true
+        type: "string"
+      - name: "target_or_id"
+        in: "path"
+        description: "The host/port combination element of the target to set as healthy,\
+          \ or the id of an existing target entry."
+        required: true
+        type: "string"
+      - description: "Temporary fix, empty object is required."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          type: "object"
+      responses:
+        204:
+          description: "HTTP 204 No Content. Request successful, no content to show."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Set target as healthy."
+  /upstreams/{upstream_host_port_or_id}/targets/{target_or_id}/unhealthy:
+    post:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "setTargetAsUnhealthyByUpstreamId"
+      parameters:
+      - name: "upstream_host_port_or_id"
+        in: "path"
+        description: "The unique identifier or the name of the upstream."
+        required: true
+        type: "string"
+      - name: "target_or_id"
+        in: "path"
+        description: "The host/port combination element of the target to set as healthy,\
+          \ or the id of an existing target entry."
+        required: true
+        type: "string"
+      - description: "Temporary fix, empty object is required."
+        in: "body"
+        name: "body"
+        required: true
+        schema:
+          type: "object"
+      responses:
+        204:
+          description: "HTTP 204 No Content. Request successful, no content to show."
+        404:
+          description: "HTTP 404 Not found. The server could not locate a resource."
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Set target as unhealthy."
+  /utils/database:
+    get:
+      description: ""
+      operationId: "getDatabaseClusterStatus"
+      parameters: []
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            items:
+              $ref: "#/definitions/DatabaseClusterStatusModel"
+            type: "array"
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+        501:
+          description: "HTTP 501 Not Implemented. The server does not support the\
+            \ functionality required to fulfill the request."
+      summary: "Get database cluster status."
+  /utils/openapi:
+    get:
+      description: ""
+      operationId: "getOpenApi"
+      parameters: []
+      produces:
+      - "text/plain"
+      responses:
+        200:
+          description: "HTTP 200 OK. Request successful."
+          schema:
+            type: "string"
+        500:
+          description: "HTTP 500 Internal Server Error. An unexpected error occurred."
+      summary: "Get Open API."
+definitions:
+  ActiveChecksHealthyModel:
+    type: "object"
+    properties:
+      http_statuses:
+        description: "An array of HTTP statuses to consider a success, indicating\
+          \ healthiness, when returned by a probe in active health checks. Defaults\
+          \ to\_[200, 302]. With form-encoded, the notation is\_http_statuses[]=200&http_statuses[]=302.\
+          \ With JSON, use an Array."
+        items:
+          format: "int32"
+          type: "integer"
+        type: "array"
+      interval:
+        description: "Interval between active health checks for healthy targets (in\
+          \ seconds). A value of zero indicates that active probes for healthy targets\
+          \ should not be performed. Defaults to\_0."
+        example: 0
+        format: "int32"
+        type: "integer"
+      successes:
+        description: "Number of successes in active probes (as defined by\_healthchecks.active.healthy.http_statuses)\
+          \ to consider a target healthy. Defaults to\_0."
+        example: 0
+        format: "int32"
+        type: "integer"
+  ActiveChecksModel:
+    type: "object"
+    properties:
+      concurrency:
+        description: "Number of targets to check concurrently in active health checks.\
+          \ Defaults to\_10."
+        example: 10
+        format: "int32"
+        type: "integer"
+      healthy:
+        $ref: "#/definitions/ActiveChecksHealthyModel"
+      http_path:
+        description: "Path to use in GET HTTP request to run as a probe on active\
+          \ health checks. Defaults to\_\"/\"."
+        example: "/my-path"
+        type: "string"
+      https_sni:
+        description: "The hostname to use as an SNI (Server Name Identification) when\
+          \ performing active health checks using HTTPS. This is particularly useful\
+          \ when Targets are configured using IPs, so that the target host’s certificate\
+          \ can be verified with the proper SNI."
+        example: "/my-sni"
+        type: "string"
+      https_verify_certificate:
+        description: "Whether to check the validity of the SSL certificate of the\
+          \ remote host when performing active health checks using HTTPS. Defaults\
+          \ to\_true."
+        example: true
+        type: "boolean"
+      timeout:
+        description: "Socket timeout for active health checks (in seconds). Defaults\
+          \ to\_1."
+        example: 1
+        format: "int32"
+        type: "integer"
+      type:
+        description: "Whether to perform active health checks using HTTP or HTTPS,\
+          \ or just attempt a TCP connection. Possible values are\_tcp,\_http\_or\_\
+          https. Defaults to\_\"http\"."
+        example: "http"
+        type: "string"
+      unhealthy:
+        $ref: "#/definitions/ActiveChecksUnhealthyModel"
+  ActiveChecksUnhealthyModel:
+    type: "object"
+    properties:
+      http_failures:
+        description: "Number of HTTP failures in active probes (as defined by\_healthchecks.active.unhealthy.http_statuses)\
+          \ to consider a target unhealthy. Defaults to\_0."
+        example: 0
+        format: "int32"
+        type: "integer"
+      http_statuses:
+        description: "An array of HTTP statuses to consider a failure, indicating\
+          \ unhealthiness, when returned by a probe in active health checks. Defaults\
+          \ to\_[429, 404, 500, 501, 502, 503, 504, 505]. With form-encoded, the notation\
+          \ is\_http_statuses[]=429&http_statuses[]=404. With JSON, use an Array."
+        items:
+          format: "int32"
+          type: "integer"
+        type: "array"
+      interval:
+        description: "Interval between active health checks for unhealthy targets\
+          \ (in seconds). A value of zero indicates that active probes for unhealthy\
+          \ targets should not be performed. Defaults to\_0."
+        example: 0
+        format: "int32"
+        type: "integer"
+      tcp_failures:
+        description: "Number of TCP failures in active probes to consider a target\
+          \ unhealthy. Defaults to\_0."
+        example: 0
+        format: "int32"
+        type: "integer"
+      timeouts:
+        description: "Number of timeouts in active probes to consider a target unhealthy.\
+          \ Defaults to\_0."
+        example: 0
+        format: "int32"
+        type: "integer"
+  CertificateCollectionModel:
+    type: "object"
+    properties:
+      data:
+        description: "An array containing list of Certificates."
+        items:
+          $ref: "#/definitions/CertificateOutputModel"
+        type: "array"
+      next:
+        description: "Link to next page."
+        example: "http://example.com/services?size=2&offset=4d924084-1adb-40a5-c042-63b19db421d1"
+        type: "string"
+    description: "A collection of Certificate entities, with pagination."
+  CertificateIdentifier:
+    type: "object"
+    properties:
+      id:
+        description: "Unique Certificate id."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+        type: "string"
+  CertificateInputModel:
+    type: "object"
+    properties:
+      cert:
+        description: "PEM-encoded public certificate of the SSL key pair."
+        example: "-----BEGIN CERTIFICATE----- example-certificate -----END CERTIFICATE-----"
+        type: "string"
+      key:
+        description: "PEM-encoded private key of the SSL key pair."
+        example: "-----BEGIN RSA PRIVATE KEY----- example-key -----BEGIN RSA PRIVATE\
+          \ KEY-----"
+        type: "string"
+      snis:
+        description: "An array of zero or more hostnames to associate with this certificate\
+          \ as SNIs. This is a sugar parameter that will, under the hood, create an\
+          \ SNI object and associate it with this certificate for your convenience."
+        items:
+          type: "string"
+        type: "array"
+      tags:
+        description: "An optional set of strings associated with the Service, for\
+          \ grouping and filtering."
+        example: "my-tag"
+        items:
+          type: "string"
+        type: "array"
+        uniqueItems: true
+  CertificateOutputModel:
+    type: "object"
+    properties:
+      cert:
+        description: "PEM-encoded public certificate of the SSL key pair."
+        example: "-----BEGIN CERTIFICATE----- example-certificate -----END CERTIFICATE-----"
+        type: "string"
+      created_at:
+        description: "The time in milliseconds when certificate was created."
+        example: 1520024653095
+        format: "int64"
+        type: "integer"
+      id:
+        description: "Unique certificate id."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+        type: "string"
+      key:
+        description: "PEM-encoded private key of the SSL key pair."
+        example: "-----BEGIN RSA PRIVATE KEY----- example-key -----BEGIN RSA PRIVATE\
+          \ KEY-----"
+        type: "string"
+      tags:
+        description: "An optional set of strings associated with the Service, for\
+          \ grouping and filtering."
+        example: "my-tag"
+        items:
+          type: "string"
+        type: "array"
+        uniqueItems: true
+  ChildHealthModel:
+    type: "object"
+    properties:
+      created_at:
+        description: "The time in milliseconds when the target was created."
+        example: 1.520024653095124E12
+        format: "double"
+        type: "number"
+      health:
+        description: "Health status of the target."
+        example: "HEALTHY"
+        type: "string"
+      id:
+        description: "ID of the target."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+        type: "string"
+      target:
+        example: "example.com"
+        type: "string"
+      upstream_id:
+        description: "ID of the parent Upstream."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+        type: "string"
+      weight:
+        example: 100
+        format: "int32"
+        type: "integer"
+  ConsumerCollectionModel:
+    type: "object"
+    properties:
+      data:
+        description: "An array containing list of consumers."
+        items:
+          $ref: "#/definitions/ConsumerOutputModel"
+        type: "array"
+      next:
+        description: "Link to next page."
+        example: "http://example.com/consumers?size=2&offset=4d924084-1adb-40a5-c042-63b19db421d1"
+        type: "string"
+    description: "A collection of consumer entities, with pagination."
+  ConsumerIdentifier:
+    type: "object"
+    properties:
+      id:
+        description: "Unique Consumer id."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+        type: "string"
+  ConsumerInputModel:
+    type: "object"
+    properties:
+      custom_id:
+        description: "Field for storing an existing unique ID for the Consumer - useful\
+          \ for mapping Kong with users in your existing database. You must send either\
+          \ this field or username with the request."
+        example: "my-custom-id"
+        type: "string"
+      tags:
+        description: "An optional set of strings associated with the Consumer, for\
+          \ grouping and filtering."
+        example: "my-tag"
+        items:
+          type: "string"
+        type: "array"
+        uniqueItems: true
+      username:
+        description: "The unique username of the Consumer. You must send either this\
+          \ field or custom_id with the request."
+        example: "my-name"
+        type: "string"
+  ConsumerOutputModel:
+    type: "object"
+    properties:
+      created_at:
+        description: "The time in milliseconds when Consumer was created."
+        example: 1520024653095
+        format: "int64"
+        type: "integer"
+      custom_id:
+        description: "Field for storing an existing unique ID for the Consumer - useful\
+          \ for mapping Kong with users in your existing database. You must send either\
+          \ this field or username with the request."
+        example: "my-custom-id"
+        type: "string"
+      id:
+        description: "Unique Consumer id."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+        type: "string"
+      tags:
+        description: "An optional set of strings associated with the Consumer, for\
+          \ grouping and filtering."
+        example: "my-tag"
+        items:
+          type: "string"
+        type: "array"
+        uniqueItems: true
+      username:
+        description: "The unique username of the Consumer. You must send either this\
+          \ field or custom_id with the request."
+        example: "my-name"
+        type: "string"
+  DatabaseClusterStatusModel:
+    type: "object"
+    properties:
+      host:
+        example: "192.168.123.123"
+        type: "string"
+      release_version:
+        example: "1.2.3"
+        type: "string"
+      up:
+        example: true
+        type: "boolean"
+    description: "Information about every node in database cluster."
+  DatabaseStatusModel:
+    type: "object"
+    properties:
+      reachable:
+        description: "A boolean value reflecting the state of the database connection.\
+          \ Please note that this flag does not reflect the health of the database\
+          \ itself."
+        example: true
+        type: "boolean"
+    description: "Metrics about the database."
+  HealthChecksModel:
+    type: "object"
+    properties:
+      active:
+        $ref: "#/definitions/ActiveChecksModel"
+      passive:
+        $ref: "#/definitions/PassiveChecksModel"
+    description: "An upstream also includes a health checker, which is able to enable\
+      \ and disable targets based on their ability or inability to serve requests.\
+      \ The configuration for the health checker is stored in the upstream object,\
+      \ and applies to all of its targets."
+  NetAddressModel:
+    type: "object"
+    properties:
+      ip:
+        example: "123.123.123.123"
+        type: "string"
+      port:
+        example: 5678
+        format: "int32"
+        type: "integer"
+    description: "Connection model that match route when using stream routing."
+  NodeInformationModel:
+    type: "object"
+    properties:
+      configuration:
+        additionalProperties:
+          type: "object"
+        description: "All kind of information about node configuration."
+        type: "object"
+      hostname:
+        description: "The hostname of the node."
+        example: "example-NAME"
+        type: "string"
+      lua_version:
+        description: "Version of lua used on the node."
+        example: "LuaJIT 2.1.0-beta3"
+        type: "string"
+      node_id:
+        description: " A UUID representing the running Kong node. This UUID is randomly\
+          \ generated when Kong starts, so the node will have a different node_id\
+          \ each time it is restarted."
+        example: "example-UUID"
+        type: "string"
+      plugins:
+        $ref: "#/definitions/PluginsInformationModel"
+      prng_seeds:
+        additionalProperties:
+          format: "int64"
+          type: "integer"
+        type: "object"
+      tagline:
+        description: "Tagline displayed on the node."
+        example: "Welcome to kong"
+        type: "string"
+      timers:
+        $ref: "#/definitions/TimersModel"
+      version:
+        description: "Version of Kong distribution on this node."
+        example: "0.13.1"
+        type: "string"
+    description: "Information about the Kong node."
+  NodeStatusModel:
+    type: "object"
+    properties:
+      database:
+        $ref: "#/definitions/DatabaseStatusModel"
+      server:
+        $ref: "#/definitions/ServerStatusModel"
+    description: "Retrieve usage information about a node, with some basic information\
+      \ about the connections being processed by the underlying nginx process, and\
+      \ the status of the database connection."
+  PassiveChecksHealthyModel:
+    type: "object"
+    properties:
+      http_statuses:
+        description: "An array of HTTP statuses which represent healthiness when produced\
+          \ by proxied traffic, as observed by passive health checks. Defaults to\_\
+          [200, 201, 202, 203, 204, 205, 206, 207, 208, 226, 300, 301, 302, 303, 304,\
+          \ 305, 306, 307, 308]. With form-encoded, the notation is\_http_statuses[]=200&http_statuses[]=201.\
+          \ With JSON, use an Array."
+        items:
+          format: "int32"
+          type: "integer"
+        type: "array"
+      successes:
+        description: "Number of successes in proxied traffic (as defined by\_healthchecks.passive.healthy.http_statuses)\
+          \ to consider a target healthy, as observed by passive health checks. Defaults\
+          \ to\_0."
+        example: 0
+        format: "int32"
+        type: "integer"
+  PassiveChecksModel:
+    type: "object"
+    properties:
+      healthy:
+        $ref: "#/definitions/PassiveChecksHealthyModel"
+      type:
+        description: "Whether to perform passive health checks interpreting HTTP/HTTPS\
+          \ statuses, or just check for TCP connection success. Possible values are\_\
+          tcp,\_http\_or\_https\_(in passive checks,\_http\_and\_https\_options are\
+          \ equivalent.). Defaults to\_\"http\"."
+        example: "http"
+        type: "string"
+      unhealthy:
+        $ref: "#/definitions/PassiveChecksUnhealthyModel"
+  PassiveChecksUnhealthyModel:
+    type: "object"
+    properties:
+      http_failures:
+        description: "Number of HTTP failures in proxied traffic (as defined by\_\
+          healthchecks.passive.unhealthy.http_statuses) to consider a target unhealthy,\
+          \ as observed by passive health checks. Defaults to\_0."
+        example: 0
+        format: "int32"
+        type: "integer"
+      http_statuses:
+        description: "An array of HTTP statuses which represent unhealthiness when\
+          \ produced by proxied traffic, as observed by passive health checks. Defaults\
+          \ to\_[429, 500, 503]. With form-encoded, the notation is\_http_statuses[]=429&http_statuses[]=500.\
+          \ With JSON, use an Array."
+        items:
+          format: "int32"
+          type: "integer"
+        type: "array"
+      tcp_failures:
+        description: "Number of TCP failures in proxied traffic to consider a target\
+          \ unhealthy, as observed by passive health checks. Defaults to\_0."
+        example: 0
+        format: "int32"
+        type: "integer"
+      timeouts:
+        description: "Number of timeouts in proxied traffic to consider a target unhealthy,\
+          \ as observed by passive health checks. Defaults to\_0."
+        example: 0
+        format: "int32"
+        type: "integer"
+  PluginCollectionModel:
+    type: "object"
+    properties:
+      data:
+        description: "An array containing list of Plugins."
+        items:
+          $ref: "#/definitions/PluginOutputModel"
+        type: "array"
+      next:
+        description: "Link to next page."
+        example: "http://example.com/plugins?size=2&offset=4d924084-1adb-40a5-c042-63b19db421d1"
+        type: "string"
+    description: "A collection of Plugin entities, with pagination."
+  PluginInputModel:
+    type: "object"
+    properties:
+      config:
+        additionalProperties:
+          type: "object"
+        description: "The configuration properties for the Plugin which can be found\
+          \ on the plugins documentation page in the Plugin Gallery."
+        type: "object"
+      consumer:
+        $ref: "#/definitions/ConsumerIdentifier"
+        description: "If set, the Plugin will activate only for requests where the\
+          \ specified has been authenticated. (Note that some plugins can not be restricted\
+          \ to consumers this way.). Leave unset for the plugin to activate regardless\
+          \ of the authenticated consumer. Defaults to null. With form-encoded, the\
+          \ notation is consumer.id=<consumer_id>. With JSON, use \"consumer\":{\"\
+          id\":\"<consumer_id>\"}."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+      enabled:
+        description: "Whether the Plugin is applied. Defaults to true."
+        example: true
+        type: "boolean"
+      name:
+        description: "The name of the Plugin."
+        example: "my-plugin"
+        type: "string"
+      protocols:
+        description: "A list of the request protocols that will trigger this Plugin.\
+          \ Possible values are \"http\", \"https\", \"tcp\", and \"tls\". The default\
+          \ value, as well as the possible values allowed on this field, may change\
+          \ depending on the plugin type. For example, plugins that only work in stream\
+          \ mode will may only support \"tcp\" and \"tls\". Defaults to [\"http\"\
+          , \"https\"]."
+        items:
+          type: "string"
+        type: "array"
+        uniqueItems: true
+      route:
+        $ref: "#/definitions/RouteIdentifier"
+        description: "If set, the Plugin will only activate when receiving requests\
+          \ via the specified route. Leave unset for the plugin to activate regardless\
+          \ of the Route being used. Defaults to null. With form-encoded, the notation\
+          \ is route.id=<route_id>. With JSON, use \"route\":{\"id\":\"<route_id>\"\
+          }."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+      run_on:
+        description: "Control on which Kong nodes this plugin will run, given a Service\
+          \ Mesh scenario. Accepted values are: * first, meaning “run on the first\
+          \ Kong node that is encountered by the request”. On an API Getaway scenario,\
+          \ this is the usual operation, since there is only one Kong node in between\
+          \ source and destination. In a sidecar-to-sidecar Service Mesh scenario,\
+          \ this means running the plugin only on the Kong sidecar of the outbound\
+          \ connection. * second, meaning “run on the second node that is encountered\
+          \ by the request”. This option is only relevant for sidecar-to-sidecar Service\
+          \ Mesh scenarios: this means running the plugin only on the Kong sidecar\
+          \ of the inbound connection. * all means “run on all nodes”, meaning both\
+          \ sidecars in a sidecar-to-sidecar scenario. This is useful for tracing/logging\
+          \ plugins. Defaults to \"first\"."
+        example: "first"
+        type: "string"
+      service:
+        $ref: "#/definitions/ServiceIdentifier"
+        description: "If set, the Plugin will only activate when receiving requests\
+          \ via one of the routes belonging to the specified Service. Leave unset\
+          \ for the plugin to activate regardless of the Service being matched. Defaults\
+          \ to null. With form-encoded, the notation is service.id=<service_id>. With\
+          \ JSON, use \"service\":{\"id\":\"<service_id>\"}."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+      tags:
+        description: "An optional set of strings associated with the Plugin, for grouping\
+          \ and filtering."
+        example: "my-tag"
+        items:
+          type: "string"
+        type: "array"
+        uniqueItems: true
+  PluginOutputModel:
+    type: "object"
+    properties:
+      config:
+        additionalProperties:
+          type: "object"
+        description: "The configuration properties for the Plugin which can be found\
+          \ on the plugins documentation page in the Plugin Gallery."
+        type: "object"
+      consumer:
+        $ref: "#/definitions/ConsumerIdentifier"
+        description: "If set, the Plugin will activate only for requests where the\
+          \ specified has been authenticated. (Note that some plugins can not be restricted\
+          \ to consumers this way.). Leave unset for the plugin to activate regardless\
+          \ of the authenticated consumer. Defaults to null. With form-encoded, the\
+          \ notation is consumer.id=<consumer_id>. With JSON, use \"consumer\":{\"\
+          id\":\"<consumer_id>\"}."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+      created_at:
+        description: "The time in milliseconds when Plugin was created."
+        example: 1520024653095
+        format: "int64"
+        type: "integer"
+      enabled:
+        description: "Whether the Plugin is applied. Defaults to true."
+        example: true
+        type: "boolean"
+      id:
+        description: "Unique plugin id."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+        type: "string"
+      name:
+        description: "The name of the Plugin."
+        example: "my-plugin"
+        type: "string"
+      protocols:
+        description: "A list of the request protocols that will trigger this Plugin.\
+          \ Possible values are \"http\", \"https\", \"tcp\", and \"tls\". The default\
+          \ value, as well as the possible values allowed on this field, may change\
+          \ depending on the plugin type. For example, plugins that only work in stream\
+          \ mode will may only support \"tcp\" and \"tls\". Defaults to [\"http\"\
+          , \"https\"]."
+        items:
+          type: "string"
+        type: "array"
+        uniqueItems: true
+      route:
+        $ref: "#/definitions/RouteIdentifier"
+        description: "If set, the Plugin will only activate when receiving requests\
+          \ via the specified route. Leave unset for the plugin to activate regardless\
+          \ of the Route being used. Defaults to null. With form-encoded, the notation\
+          \ is route.id=<route_id>. With JSON, use \"route\":{\"id\":\"<route_id>\"\
+          }."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+      run_on:
+        description: "Control on which Kong nodes this plugin will run, given a Service\
+          \ Mesh scenario. Accepted values are: * first, meaning “run on the first\
+          \ Kong node that is encountered by the request”. On an API Getaway scenario,\
+          \ this is the usual operation, since there is only one Kong node in between\
+          \ source and destination. In a sidecar-to-sidecar Service Mesh scenario,\
+          \ this means running the plugin only on the Kong sidecar of the outbound\
+          \ connection. * second, meaning “run on the second node that is encountered\
+          \ by the request”. This option is only relevant for sidecar-to-sidecar Service\
+          \ Mesh scenarios: this means running the plugin only on the Kong sidecar\
+          \ of the inbound connection. * all means “run on all nodes”, meaning both\
+          \ sidecars in a sidecar-to-sidecar scenario. This is useful for tracing/logging\
+          \ plugins. Defaults to \"first\"."
+        example: "first"
+        type: "string"
+      service:
+        $ref: "#/definitions/ServiceIdentifier"
+        description: "If set, the Plugin will only activate when receiving requests\
+          \ via one of the routes belonging to the specified Service. Leave unset\
+          \ for the plugin to activate regardless of the Service being matched. Defaults\
+          \ to null. With form-encoded, the notation is service.id=<service_id>. With\
+          \ JSON, use \"service\":{\"id\":\"<service_id>\"}."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+      tags:
+        description: "An optional set of strings associated with the Plugin, for grouping\
+          \ and filtering."
+        example: "my-tag"
+        items:
+          type: "string"
+        type: "array"
+        uniqueItems: true
+  PluginsInformationModel:
+    type: "object"
+    properties:
+      available_on_server:
+        additionalProperties:
+          type: "boolean"
+        description: "Names of plugins that are installed on the node."
+        type: "object"
+      enabled_in_cluster:
+        description: "Names of plugins that are enabled/configured. That is, the plugins\
+          \ configurations currently in the datastore shared by all Kong nodes."
+        items:
+          type: "string"
+        type: "array"
+    description: "Information about plugins installed, configured or enabled on the\
+      \ Kong node."
+  RouteCollectionModel:
+    type: "object"
+    properties:
+      data:
+        description: "An array containing list of Routes."
+        items:
+          $ref: "#/definitions/RouteOutputModel"
+        type: "array"
+      next:
+        description: "Link to next page."
+        example: "http://example.com/routes?size=2&offset=4d924084-1adb-40a5-c042-63b19db421d1"
+        type: "string"
+    description: "A collection of Route entities, with pagination."
+  RouteIdentifier:
+    type: "object"
+    properties:
+      id:
+        description: "Unique Route id."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+        type: "string"
+  RouteInputModel:
+    type: "object"
+    properties:
+      destinations:
+        description: "A list of IP destinations of incoming connections that match\
+          \ this Route when using stream routing. Each entry is an object with fields\
+          \ “ip” (optionally in CIDR range notation) and/or “port”. When using tcp\
+          \ or tls protocols, at least one of snis, sources, or destinations must\
+          \ be set."
+        items:
+          $ref: "#/definitions/NetAddressModel"
+        type: "array"
+        uniqueItems: true
+      hosts:
+        description: "A list of domain names that match this Route. When using http\
+          \ or https protocols, at least one of hosts, paths, or methods must be set.\
+          \ With form-encoded, the notation is hosts[]=example.com&hosts[]=foo.test.\
+          \ With JSON, use an Array."
+        items:
+          type: "string"
+        type: "array"
+      methods:
+        description: "A list of HTTP methods that match this Route. When using http\
+          \ or https protocols, at least one of hosts, paths, or methods must be set."
+        items:
+          type: "string"
+        type: "array"
+      name:
+        description: "The name of the Route."
+        example: "my-route"
+        type: "string"
+      paths:
+        description: "A list of paths that match this Route. When using http or https\
+          \ protocols, at least one of hosts, paths, or methods must be set. With\
+          \ form-encoded, the notation is paths[]=/foo&paths[]=/bar. With JSON, use\
+          \ an Array."
+        items:
+          type: "string"
+        type: "array"
+      preserve_host:
+        description: "When matching a Route via one of the hosts domain names, use\
+          \ the request Host header in the upstream request headers. If set to false,\
+          \ the upstream Host header will be that of the Service’s host."
+        example: false
+        type: "boolean"
+      protocols:
+        description: "A list of the protocols this Route should allow. When set to\
+          \ [\"https\"], HTTP requests are answered with a request to upgrade to HTTPS.\
+          \ Defaults to [\"http\", \"https\"]. Possible values are \"http\", \"https\"\
+          , \"tcp\", and \"tls\". "
+        items:
+          type: "string"
+        type: "array"
+      regex_priority:
+        description: "A number used to choose which route resolves a given request\
+          \ when several routes match it using regexes simultaneously. When two routes\
+          \ match the path and have the same regex_priority, the older one (lowest\
+          \ created_at) is used. Note that the priority for non-regex routes is different\
+          \ (longer non-regex routes are matched before shorter ones)."
+        example: 0
+        format: "int32"
+        type: "integer"
+      service:
+        $ref: "#/definitions/ServiceIdentifier"
+        description: "The Service this Route is associated to. This is where the Route\
+          \ proxies traffic to. With form-encoded, the notation is service.id=<service_id>.\
+          \ With JSON, use \"service\":{\"id\":\"<service_id>\"}."
+      snis:
+        description: "A list of SNIs that match this Route when using stream routing.\
+          \ When using tcp or tls protocols, at least one of snis, sources, or destinations\
+          \ must be set."
+        example: "my-sni"
+        items:
+          type: "string"
+        type: "array"
+        uniqueItems: true
+      sources:
+        description: "A list of IP sources of incoming connections that match this\
+          \ Route when using stream routing. Each entry is an object with fields “\
+          ip” (optionally in CIDR range notation) and/or “port”. When using tcp or\
+          \ tls protocols, at least one of snis, sources, or destinations must be\
+          \ set."
+        items:
+          $ref: "#/definitions/NetAddressModel"
+        type: "array"
+        uniqueItems: true
+      strip_path:
+        description: "When matching a Route via one of the paths, strip the matching\
+          \ prefix from the upstream request URL. Defaults to true."
+        example: true
+        type: "boolean"
+      tags:
+        description: "An optional set of strings associated with the Route, for grouping\
+          \ and filtering."
+        example: "my-tag"
+        items:
+          type: "string"
+        type: "array"
+        uniqueItems: true
+  RouteOutputModel:
+    type: "object"
+    properties:
+      created_at:
+        description: "The time in milliseconds when Route was created."
+        example: 1520024653095
+        format: "int64"
+        type: "integer"
+      destinations:
+        description: "A list of IP destinations of incoming connections that match\
+          \ this Route when using stream routing. Each entry is an object with fields\
+          \ “ip” (optionally in CIDR range notation) and/or “port”. When using tcp\
+          \ or tls protocols, at least one of snis, sources, or destinations must\
+          \ be set."
+        items:
+          $ref: "#/definitions/NetAddressModel"
+        type: "array"
+        uniqueItems: true
+      hosts:
+        description: "A list of domain names that match this Route. When using http\
+          \ or https protocols, at least one of hosts, paths, or methods must be set.\
+          \ With form-encoded, the notation is hosts[]=example.com&hosts[]=foo.test.\
+          \ With JSON, use an Array."
+        items:
+          type: "string"
+        type: "array"
+      id:
+        description: "Unique Route id."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+        type: "string"
+      methods:
+        description: "A list of HTTP methods that match this Route. When using http\
+          \ or https protocols, at least one of hosts, paths, or methods must be set."
+        items:
+          type: "string"
+        type: "array"
+      name:
+        description: "The name of the Route."
+        example: "my-route"
+        type: "string"
+      paths:
+        description: "A list of paths that match this Route. When using http or https\
+          \ protocols, at least one of hosts, paths, or methods must be set. With\
+          \ form-encoded, the notation is paths[]=/foo&paths[]=/bar. With JSON, use\
+          \ an Array."
+        items:
+          type: "string"
+        type: "array"
+      preserve_host:
+        description: "When matching a Route via one of the hosts domain names, use\
+          \ the request Host header in the upstream request headers. If set to false,\
+          \ the upstream Host header will be that of the Service’s host."
+        example: false
+        type: "boolean"
+      protocols:
+        description: "A list of the protocols this Route should allow. When set to\
+          \ [\"https\"], HTTP requests are answered with a request to upgrade to HTTPS.\
+          \ Defaults to [\"http\", \"https\"]. Possible values are \"http\", \"https\"\
+          , \"tcp\", and \"tls\". "
+        items:
+          type: "string"
+        type: "array"
+      regex_priority:
+        description: "A number used to choose which route resolves a given request\
+          \ when several routes match it using regexes simultaneously. When two routes\
+          \ match the path and have the same regex_priority, the older one (lowest\
+          \ created_at) is used. Note that the priority for non-regex routes is different\
+          \ (longer non-regex routes are matched before shorter ones)."
+        example: 0
+        format: "int32"
+        type: "integer"
+      service:
+        $ref: "#/definitions/ServiceIdentifier"
+        description: "The Service this Route is associated to. This is where the Route\
+          \ proxies traffic to. With form-encoded, the notation is service.id=<service_id>.\
+          \ With JSON, use \"service\":{\"id\":\"<service_id>\"}."
+      snis:
+        description: "A list of SNIs that match this Route when using stream routing.\
+          \ When using tcp or tls protocols, at least one of snis, sources, or destinations\
+          \ must be set."
+        example: "my-sni"
+        items:
+          type: "string"
+        type: "array"
+        uniqueItems: true
+      sources:
+        description: "A list of IP sources of incoming connections that match this\
+          \ Route when using stream routing. Each entry is an object with fields “\
+          ip” (optionally in CIDR range notation) and/or “port”. When using tcp or\
+          \ tls protocols, at least one of snis, sources, or destinations must be\
+          \ set."
+        items:
+          $ref: "#/definitions/NetAddressModel"
+        type: "array"
+        uniqueItems: true
+      strip_path:
+        description: "When matching a Route via one of the paths, strip the matching\
+          \ prefix from the upstream request URL. Defaults to true."
+        example: true
+        type: "boolean"
+      tags:
+        description: "An optional set of strings associated with the Route, for grouping\
+          \ and filtering."
+        example: "my-tag"
+        items:
+          type: "string"
+        type: "array"
+        uniqueItems: true
+      updated_at:
+        description: "The time in milliseconds when Route was modified."
+        example: 1521024653095
+        format: "int64"
+        type: "integer"
+  ServerStatusModel:
+    type: "object"
+    properties:
+      connections_accepted:
+        description: "The total number of accepted client connections."
+        example: 267084
+        format: "int32"
+        type: "integer"
+      connections_active:
+        description: "The current number of active client connections including Waiting\
+          \ connections."
+        example: 1
+        format: "int32"
+        type: "integer"
+      connections_handled:
+        description: "The total number of handled connections. Generally, the parameter\
+          \ value is the same as accepts unless some resource limits have been reached."
+        example: 267084
+        format: "int64"
+        type: "integer"
+      connections_reading:
+        description: "The current number of connections where Kong is reading the\
+          \ request header."
+        example: 0
+        format: "int32"
+        type: "integer"
+      connections_waiting:
+        description: "The current number of idle client connections waiting for a\
+          \ request."
+        example: 0
+        format: "int32"
+        type: "integer"
+      connections_writing:
+        description: "The current number of connections where nginx is writing the\
+          \ response back to the client."
+        example: 1
+        format: "int32"
+        type: "integer"
+      total_requests:
+        description: "The total number of client requests."
+        example: 268201
+        format: "int64"
+        type: "integer"
+    description: "Metrics about the nginx HTTP/S server."
+  ServiceCollectionModel:
+    type: "object"
+    properties:
+      data:
+        description: "An array containing list of services."
+        items:
+          $ref: "#/definitions/ServiceOutputModel"
+        type: "array"
+      next:
+        description: "Link to next page."
+        example: "http://example.com/services?size=2&offset=4d924084-1adb-40a5-c042-63b19db421d1"
+        type: "string"
+    description: "A collection of service entities, with pagination."
+  ServiceIdentifier:
+    type: "object"
+    properties:
+      id:
+        description: "Unique service id."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+        type: "string"
+  ServiceInputModel:
+    type: "object"
+    properties:
+      connect_timeout:
+        description: "The timeout in milliseconds for establishing a connection to\
+          \ the upstream server. Defaults to 60000."
+        example: 60000
+        format: "int32"
+        type: "integer"
+      host:
+        description: "The host of the upstream server."
+        example: "example.com"
+        type: "string"
+      name:
+        description: "The name of the service."
+        example: "my-service"
+        type: "string"
+      path:
+        description: "The path to be used in requests to the upstream server."
+        example: "/api"
+        type: "string"
+      port:
+        description: "The upstream server port. Defaults to 80."
+        example: 80
+        format: "int32"
+        type: "integer"
+      protocol:
+        description: "The protocol used to communicate with the upstream. It can be\
+          \ one of http or https. Defaults to \"http\"."
+        example: "http"
+        type: "string"
+      read_timeout:
+        description: "The timeout in milliseconds between two successive read operations\
+          \ for transmitting a request to the upstream server. Defaults to 60000."
+        example: 60000
+        format: "int32"
+        type: "integer"
+      retries:
+        description: "The number of retries to execute upon failure to proxy. The\
+          \ default is 5."
+        example: 5
+        format: "int32"
+        type: "integer"
+      tags:
+        description: "An optional set of strings associated with the Service, for\
+          \ grouping and filtering."
+        example: "my-tag"
+        items:
+          type: "string"
+        type: "array"
+        uniqueItems: true
+      url:
+        description: "Shorthand attribute to set protocol, host, port and path at\
+          \ once. This attribute is write-only (the Admin API never “returns” the\
+          \ url)."
+        example: "http://example.com:80/api"
+        type: "string"
+      write_timeout:
+        description: "The timeout in milliseconds between two successive write operations\
+          \ for transmitting a request to the upstream server. Defaults to 60000."
+        example: 60000
+        format: "int32"
+        type: "integer"
+  ServiceOutputModel:
+    type: "object"
+    properties:
+      connect_timeout:
+        description: "The timeout in milliseconds for establishing a connection to\
+          \ the upstream server. Defaults to 60000."
+        example: 60000
+        format: "int32"
+        type: "integer"
+      created_at:
+        description: "The time in milliseconds when the service was created."
+        example: 1520024653095
+        format: "int64"
+        type: "integer"
+      host:
+        description: "The host of the upstream server."
+        example: "example.com"
+        type: "string"
+      id:
+        description: "Unique service id."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+        type: "string"
+      name:
+        description: "The name of the service."
+        example: "my-service"
+        type: "string"
+      path:
+        description: "The path to be used in requests to the upstream server."
+        example: "/api"
+        type: "string"
+      port:
+        description: "The upstream server port. Defaults to 80."
+        example: 80
+        format: "int32"
+        type: "integer"
+      protocol:
+        description: "The protocol used to communicate with the upstream. It can be\
+          \ one of http or https. Defaults to \"http\"."
+        example: "http"
+        type: "string"
+      read_timeout:
+        description: "The timeout in milliseconds between two successive read operations\
+          \ for transmitting a request to the upstream server. Defaults to 60000."
+        example: 60000
+        format: "int32"
+        type: "integer"
+      retries:
+        description: "The number of retries to execute upon failure to proxy. The\
+          \ default is 5."
+        example: 5
+        format: "int32"
+        type: "integer"
+      tags:
+        description: "An optional set of strings associated with the Service, for\
+          \ grouping and filtering."
+        example: "my-tag"
+        items:
+          type: "string"
+        type: "array"
+        uniqueItems: true
+      updated_at:
+        description: "The time in milliseconds when the service was modified."
+        example: 1521024653095
+        format: "int64"
+        type: "integer"
+      write_timeout:
+        description: "The timeout in milliseconds between two successive write operations\
+          \ for transmitting a request to the upstream server. Defaults to 60000."
+        example: 60000
+        format: "int32"
+        type: "integer"
+  SniCollectionModel:
+    type: "object"
+    properties:
+      data:
+        description: "An array containing list of SNIs."
+        items:
+          $ref: "#/definitions/SniOutputModel"
+        type: "array"
+      next:
+        description: "Link to next page."
+        example: "http://example.com/snis?size=2&offset=4d924084-1adb-40a5-c042-63b19db421d1"
+        type: "string"
+    description: "A collection of SNIs entities."
+  SniInputModel:
+    type: "object"
+    properties:
+      certificate:
+        $ref: "#/definitions/CertificateIdentifier"
+        description: "The id (a UUID) of the certificate with which to associate the\
+          \ SNI hostname With form-encoded, the notation is certificate.id=<certificate_id>.\
+          \ With JSON, use \"certificate\":{\"id\":\"<certificate_id>\"}."
+      name:
+        description: "The SNI name to associate with the given certificate."
+        example: "my-sni"
+        type: "string"
+      tags:
+        description: "An optional set of strings associated with the SNIs, for grouping\
+          \ and filtering."
+        example: "my-tag"
+        items:
+          type: "string"
+        type: "array"
+        uniqueItems: true
+  SniOutputModel:
+    type: "object"
+    properties:
+      certificate:
+        $ref: "#/definitions/CertificateIdentifier"
+        description: "The id (a UUID) of the certificate with which to associate the\
+          \ SNI hostname With form-encoded, the notation is certificate.id=<certificate_id>.\
+          \ With JSON, use \"certificate\":{\"id\":\"<certificate_id>\"}."
+      created_at:
+        description: "The time in milliseconds when SNI was created."
+        example: 1520024653095
+        format: "int64"
+        type: "integer"
+      id:
+        description: "Unique SNI id."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+        type: "string"
+      name:
+        description: "The SNI name to associate with the given certificate."
+        example: "my-sni"
+        type: "string"
+      tags:
+        description: "An optional set of strings associated with the SNIs, for grouping\
+          \ and filtering."
+        example: "my-tag"
+        items:
+          type: "string"
+        type: "array"
+        uniqueItems: true
+  TagCollectionModel:
+    type: "object"
+    properties:
+      data:
+        description: "An array containing list of tags."
+        items:
+          $ref: "#/definitions/TagModel"
+        type: "array"
+      next:
+        description: "Link to next page."
+        example: "/tags?offset=c47139f3-d780-483d-8a97-17e9adc5a7ab"
+        type: "string"
+      offset:
+        description: "Page offset value."
+        example: "c47139f3-d780-483d-8a97-17e9adc5a7ab"
+        type: "string"
+    description: "A collection of the Tag entities."
+  TagModel:
+    type: "object"
+    properties:
+      entity_id:
+        description: "The ID associated to the given entity."
+        example: "acf60b10-125c-4c1a-bffe-6ed55daefba4"
+        type: "string"
+      entity_name:
+        description: "The name associated to the given entity."
+        example: "services"
+        type: "string"
+      tag:
+        description: "The tag associated to the given entity."
+        example: "my-tag"
+        type: "string"
+    description: "Tags are strings associated to entities in Kong. Each tag must be\
+      \ composed of one or more alphanumeric characters, _, -, . or ~."
+  TargetCollectionModel:
+    type: "object"
+    properties:
+      data:
+        description: "An array containing list of Targets."
+        items:
+          $ref: "#/definitions/TargetOutputModel"
+        type: "array"
+      next:
+        description: "Link to next page."
+        example: "http://example.com/targets?size=2&offset=4d924084-1adb-40a5-c042-63b19db421d1"
+        type: "string"
+    description: "A collection of Target entities, with pagination."
+  TargetInputModel:
+    type: "object"
+    properties:
+      tags:
+        description: "An optional set of strings associated with the Target, for grouping\
+          \ and filtering."
+        example: "my-tag"
+        items:
+          type: "string"
+        type: "array"
+        uniqueItems: true
+      target:
+        description: "The target address (ip or hostname) and port. If the hostname\
+          \ resolves to an SRV record, the port value will be overridden by the value\
+          \ from the DNS record."
+        example: "example.com:8000"
+        type: "string"
+      weight:
+        description: "The weight this target gets within the upstream loadbalancer\
+          \ (0-1000). If the hostname resolves to an SRV record, the weight value\
+          \ will be overridden by the value from the DNS record. Defaults to 100."
+        example: 100
+        format: "int32"
+        type: "integer"
+  TargetOutputModel:
+    type: "object"
+    properties:
+      created_at:
+        description: "The time in milliseconds when the Target was created."
+        example: 1.520024653095124E12
+        format: "double"
+        type: "number"
+      id:
+        description: "Unique Target id."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+        type: "string"
+      tags:
+        description: "An optional set of strings associated with the Target, for grouping\
+          \ and filtering."
+        example: "my-tag"
+        items:
+          type: "string"
+        type: "array"
+        uniqueItems: true
+      target:
+        description: "The target address (ip or hostname) and port. If the hostname\
+          \ resolves to an SRV record, the port value will be overridden by the value\
+          \ from the DNS record."
+        example: "example.com:8000"
+        type: "string"
+      upstream:
+        $ref: "#/definitions/UpstreamIdentifier"
+        description: "The unique identifier or the host:port attribute of the Upstream\
+          \ that should be associated to the newly-created Target."
+      weight:
+        description: "The weight this target gets within the upstream loadbalancer\
+          \ (0-1000). If the hostname resolves to an SRV record, the weight value\
+          \ will be overridden by the value from the DNS record. Defaults to 100."
+        example: 100
+        format: "int32"
+        type: "integer"
+  TimersModel:
+    type: "object"
+    properties:
+      pending:
+        example: 0
+        format: "int32"
+        type: "integer"
+      running:
+        example: 2
+        format: "int32"
+        type: "integer"
+  UpstreamCollectionModel:
+    type: "object"
+    properties:
+      data:
+        description: "An array containing list of Upstreams."
+        items:
+          $ref: "#/definitions/UpstreamOutputModel"
+        type: "array"
+      next:
+        description: "Link to the next page."
+        type: "string"
+    description: "A collection of Upstream entities, with pagination."
+  UpstreamHealthModel:
+    type: "object"
+    properties:
+      data:
+        items:
+          $ref: "#/definitions/ChildHealthModel"
+        type: "array"
+      next:
+        description: "Link to next page."
+        example: "http://example.com/targets?size=2&offset=4d924084-1adb-40a5-c042-63b19db421d1"
+        type: "string"
+      node_id:
+        description: "The node ID."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+        type: "string"
+    description: "Displays the health status for all Targets of a given Upstream,\
+      \ according to the perspective of a specific Kong node. Note that, being node-specific\
+      \ information, making this same request to different nodes of the Kong cluster\
+      \ may produce different results. For example, one specific node of the Kong\
+      \ cluster may be experiencing network issues, causing it to fail to connect\
+      \ to some Targets: these Targets will be marked as unhealthy by that node (directing\
+      \ traffic from this node to other Targets that it can successfully reach), but\
+      \ healthy to all others Kong nodes (which have no problems using that Target)."
+  UpstreamIdentifier:
+    type: "object"
+    properties:
+      id:
+        description: "Unique Upstream id."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+        type: "string"
+  UpstreamInputModel:
+    type: "object"
+    properties:
+      hash_fallback:
+        description: "What to use as hashing input if the primary hash_on does not\
+          \ return a hash (eg. header is missing, or no consumer identified). One\
+          \ of: none, consumer, ip, header, or cookie. Not available if hash_on is\
+          \ set to cookie. Defaults to \"none\"."
+        example: "none"
+        type: "string"
+      hash_fallback_header:
+        description: "The header name to take the value from as hash input. Only required\
+          \ when hash_fallback is set to header."
+        example: "my-other-header"
+        type: "string"
+      hash_on:
+        description: "What to use as hashing input: none (resulting in a weighted-round-robin\
+          \ scheme with no hashing), consumer, ip, header, or cookie. Defaults to\
+          \ \"none\"."
+        example: "none"
+        type: "string"
+      hash_on_cookie:
+        description: "The cookie name to take the value from as hash input. Only required\
+          \ when hash_on or hash_fallback is set to cookie. If the specified cookie\
+          \ is not in the request, Kong will generate a value and set the cookie in\
+          \ the response."
+        example: "my-cookie"
+        type: "string"
+      hash_on_cookie_path:
+        description: "The cookie path to set in the response headers. Only required\
+          \ when hash_on or hash_fallback is set to cookie. Defaults to \"/\"."
+        example: "/my-path"
+        type: "string"
+      hash_on_header:
+        description: "The header name to take the value from as hash input. Only required\
+          \ when hash_on is set to header."
+        example: "my-header"
+        type: "string"
+      healthchecks:
+        $ref: "#/definitions/HealthChecksModel"
+      name:
+        description: "This is a hostname, which must be equal to the host of a Service."
+        example: "example.v1.xyz"
+        type: "string"
+      slots:
+        description: "The number of slots in the loadbalancer algorithm (10-65536).\
+          \ Defaults to 10000."
+        example: 1000
+        format: "int32"
+        type: "integer"
+      tags:
+        description: "An optional set of strings associated with the Upstream, for\
+          \ grouping and filtering."
+        example: "my-tag"
+        items:
+          type: "string"
+        type: "array"
+        uniqueItems: true
+  UpstreamOutputModel:
+    type: "object"
+    properties:
+      created_at:
+        description: "The time in milliseconds when the Upstream was created."
+        example: 1520024653095
+        format: "int64"
+        type: "integer"
+      hash_fallback:
+        description: "What to use as hashing input if the primary hash_on does not\
+          \ return a hash (eg. header is missing, or no consumer identified). One\
+          \ of: none, consumer, ip, header, or cookie. Not available if hash_on is\
+          \ set to cookie. Defaults to \"none\"."
+        example: "none"
+        type: "string"
+      hash_fallback_header:
+        description: "The header name to take the value from as hash input. Only required\
+          \ when hash_fallback is set to header."
+        example: "my-other-header"
+        type: "string"
+      hash_on:
+        description: "What to use as hashing input: none (resulting in a weighted-round-robin\
+          \ scheme with no hashing), consumer, ip, header, or cookie. Defaults to\
+          \ \"none\"."
+        example: "none"
+        type: "string"
+      hash_on_cookie:
+        description: "The cookie name to take the value from as hash input. Only required\
+          \ when hash_on or hash_fallback is set to cookie. If the specified cookie\
+          \ is not in the request, Kong will generate a value and set the cookie in\
+          \ the response."
+        example: "my-cookie"
+        type: "string"
+      hash_on_cookie_path:
+        description: "The cookie path to set in the response headers. Only required\
+          \ when hash_on or hash_fallback is set to cookie. Defaults to \"/\"."
+        example: "/my-path"
+        type: "string"
+      hash_on_header:
+        description: "The header name to take the value from as hash input. Only required\
+          \ when hash_on is set to header."
+        example: "my-header"
+        type: "string"
+      healthchecks:
+        $ref: "#/definitions/HealthChecksModel"
+      id:
+        description: "Unique upstream id."
+        example: "0c61e164-6171-4837-8836-8f5298726d53"
+        type: "string"
+      name:
+        description: "This is a hostname, which must be equal to the host of a Service."
+        example: "example.v1.xyz"
+        type: "string"
+      slots:
+        description: "The number of slots in the loadbalancer algorithm (10-65536).\
+          \ Defaults to 10000."
+        example: 1000
+        format: "int32"
+        type: "integer"
+      tags:
+        description: "An optional set of strings associated with the Upstream, for\
+          \ grouping and filtering."
+        example: "my-tag"
+        items:
+          type: "string"
+        type: "array"
+        uniqueItems: true
