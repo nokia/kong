@@ -122,6 +122,7 @@ build = {
     ["kong.tools.printable"] = "kong/tools/printable.lua",
     ["kong.tools.timestamp"] = "kong/tools/timestamp.lua",
     ["kong.tools.cassandra_cluster_topology_coordinator"] = "kong/tools/cassandra_cluster_topology_coordinator.lua",
+    ["kong.tools.certificate_lifetime_validator"] = "kong/tools/certificate_lifetime_validator.lua",
     ["kong.tools.maria.utils"] = "kong/tools/maria/utils.lua",
 
     ["kong.runloop.handler"] = "kong/runloop/handler.lua",

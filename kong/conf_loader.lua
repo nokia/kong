@@ -175,6 +175,9 @@ local CONF_INFERENCES = {
 
   client_ssl = { typ = "boolean" },
 
+  validate_certs_refresh_interval = { typ = "number" },
+  validate_certs_warn_before = { typ = "number"},
+
   proxy_access_log = { typ = "string" },
   proxy_error_log = { typ = "string" },
   admin_access_log = { typ = "string" },

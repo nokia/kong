@@ -270,6 +270,14 @@
 #admin_ssl_cert_key =            # The absolute path to the SSL key for
                                  # `admin_listen` values with SSL enabled.
 
+#validate_certs_refresh_interval = 300  # Timer (in seconds) which will periodically
+                                        # check the expiration date for all
+                                        # certificates used by Kong. If value set to
+                                        # less then 300, 300 will be used anyway.
+
+#validate_certs_warn_before = 7  # Number of days before certificate expiration
+                                 # date to warn the user.
+
 #upstream_keepalive = 60         # Sets the maximum number of idle keepalive
                                  # connections to upstream servers that are
                                  # preserved in the cache of each worker

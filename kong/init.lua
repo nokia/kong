@@ -62,6 +62,7 @@ _G.kong = kong_global.new() -- no versioned PDK for plugins for now
 local DB = require "kong.db"
 local dns = require "kong.tools.dns"
 local utils = require "kong.tools.utils"
+local timestamp = require "kong.tools.timestamp"
 local lapis = require "lapis"
 local pl_utils = require "pl.utils"
 local http_tls = require "http.tls"
@@ -80,6 +81,7 @@ local plugins_iterator = require "kong.runloop.plugins_iterator"
 local balancer_execute = require("kong.runloop.balancer").execute
 local kong_error_handlers = require "kong.error_handlers"
 local topology_coordinator = require "kong.tools.cassandra_cluster_topology_coordinator"
+local cert_lifetime_validator = require "kong.tools.certificate_lifetime_validator"
 
 local kong             = kong
 local ngx              = ngx
@@ -89,6 +91,8 @@ local ngx_ERR          = ngx.ERR
 local ngx_WARN         = ngx.WARN
 local ngx_CRIT         = ngx.CRIT
 local ngx_DEBUG        = ngx.DEBUG
+local ngx_ALERT        = ngx.ALERT
+local gmatch           = string.gmatch
 local ipairs           = ipairs
 local assert           = assert
 local tostring         = tostring
@@ -287,6 +291,58 @@ local function load_declarative_config(kong_config, entities)
 
     return true
   end)
+end
+
+
+local function validate_kong_certificates()
+  if kong.configuration.lua_ssl_trusted_certificate ~= nil then
+    local lua_ssl_trusted_certificate = pl_utils.readfile(kong.configuration.lua_ssl_trusted_certificate)
+    for cert in gmatch(lua_ssl_trusted_certificate, "-----BEGIN CERTIFICATE-----\n(.-)-----END CERTIFICATE-----") do
+      local valid, valid_to, expire, serial = cert_lifetime_validator.validate_cert_expiration_date("-----BEGIN CERTIFICATE-----\n" .. cert ..
+              "-----END CERTIFICATE-----", kong.configuration)
+      if valid then
+        ngx.log(ngx_ALERT, "Kong trusted certificate " .. expire .. " at " ..  timestamp.get_timetable(valid_to):rfc_3339()
+                .. " Serial: " .. tostring(serial) .. ", configuration option: lua_ssl_trusted_certificate")
+      end
+    end
+  end
+
+  if kong.configuration.client_ssl_cert ~= nil then
+    local client_ssl_cert = pl_utils.readfile(kong.configuration.client_ssl_cert)
+    local valid, valid_to, expire, serial = cert_lifetime_validator.validate_cert_expiration_date(client_ssl_cert, kong.configuration)
+    if valid then
+      ngx.log(ngx_ALERT, "Kong client certificate " .. expire .. " at " ..  timestamp.get_timetable(valid_to):rfc_3339()
+              .. " Serial: " .. tostring(serial) .. ", configuration option: client_ssl_cert")
+    end
+  end
+
+  if kong.configuration.admin_ssl_cert ~= nil then
+    local admin_ssl_cert = pl_utils.readfile(kong.configuration.admin_ssl_cert)
+    local valid, valid_to, expire, serial = cert_lifetime_validator.validate_cert_expiration_date(admin_ssl_cert, kong.configuration)
+    if valid then
+      ngx.log(ngx_ALERT, "Kong server certificate " .. expire .. " at " ..  timestamp.get_timetable(valid_to):rfc_3339()
+              .. " Serial: " .. tostring(serial) .. ", configuration option: admin_ssl_cert")
+    end
+  end
+
+  if kong.configuration.ssl_cert ~= nil then
+    local ssl_cert = pl_utils.readfile(kong.configuration.ssl_cert)
+    local valid, valid_to, expire, serial = cert_lifetime_validator.validate_cert_expiration_date(ssl_cert, kong.configuration)
+    if valid then
+      ngx.log(ngx_ALERT, "Kong server certificate " .. expire .. " at " ..  timestamp.get_timetable(valid_to):rfc_3339()
+              .. " Serial: " .. tostring(serial) .. ", configuration option: ssl_cert")
+    end
+  end
+
+  for row, err, _ in kong.db.certificates:each() do
+    if not err then
+      local valid, valid_to, expire, serial = cert_lifetime_validator.validate_cert_expiration_date(row.cert, kong.configuration)
+      if valid then
+        ngx.log(ngx_ALERT, "Kong server certificate " .. expire .. " at " .. timestamp.get_timetable(valid_to):rfc_3339()
+                .. " Serial: " .. tostring(serial) .. ", configured in DB by admin api /certificates ID: " .. row.id)
+      end
+    end
+  end
 end
 
 
@@ -563,6 +619,18 @@ function Kong.init_worker()
     if not ok then
       ngx.log(ngx.ERR, "Failed to start Cassandra topology coordinator in background thread: " .. err)
     end
+  end
+
+
+  -- Add timer which will periodically check if kong certificates has expired.
+  local validate_certs_refresh_interval = 300
+  if kong.configuration.validate_certs_refresh_interval > 300 then
+    validate_certs_refresh_interval = kong.configuration.validate_certs_refresh_interval
+  end
+
+  local ok, err = ngx.timer.every(validate_certs_refresh_interval, validate_kong_certificates)
+  if not ok then
+    ngx.log(ngx.ERR, "Failed to check certificates expiration dates: " .. err)
   end
 end
 
