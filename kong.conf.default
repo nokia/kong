@@ -710,6 +710,30 @@
                                  #
                                  # See https://github.com/openresty/lua-nginx-module#lua_ssl_verify_depth
 
+# mTLS related configuration parameters
+
+#nginx_admin_ssl_verify_client      # Sets the verification of the client certificate on the Kong Admin SSL port.
+                                    #
+                                    # Possible values are:
+                                    # on - client certificate is required and has to be signed with trusted CA
+                                    # optional - requests the client certificate and verifies it if the certificate is
+                                    # present
+                                    # off - client certificate is not requested
+
+#nginx_admin_ssl_client_certificate # Specifies a file with trusted CA certificates in the PEM format used to verify
+                                    # client certificates.
+
+#nginx_proxy_ssl_verify_client      # Sets the verification of the client certificate on the Kong Proxy SSL port.
+                                    #
+                                    # Possible values are:
+                                    # on - client certificate is required and has to be signed with trusted CA
+                                    # optional - requests the client certificate and verifies it if the certificate is
+                                    # present
+                                    # off - client certificate is not requested
+
+#nginx_proxy_ssl_client_certificate # Specifies a file with trusted CA certificates in the PEM format used to verify
+                                    # client certificates.
+
 #lua_package_path = ./?.lua;./?/init.lua;  # Sets the Lua module search path
                                            # (LUA_PATH). Useful when developing
                                            # or using custom plugins not stored

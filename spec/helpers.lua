@@ -1314,6 +1314,13 @@ local function start_kong(env, tables, preserve_prefix)
     nginx_conf = " --nginx-conf " .. env.nginx_conf
   end
 
+  local kong_conf = ""
+  if env.kong_conf then
+    kong_conf = env.kong_conf
+  else
+    kong_conf = TEST_CONF_PATH
+  end
+
   if dcbp and not env.declarative_config then
     if not config_yml then
       config_yml = prefix .. "/config.yml"
@@ -1327,7 +1334,7 @@ local function start_kong(env, tables, preserve_prefix)
     env.declarative_config = config_yml
   end
 
-  return kong_exec("start --conf " .. TEST_CONF_PATH .. nginx_conf, env)
+  return kong_exec("start --conf " .. kong_conf .. nginx_conf, env)
 end
 
 
