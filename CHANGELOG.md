@@ -1,5 +1,6 @@
 # Table of Contents
 
+- [nokia-1.1.1](#nokia-111)
 - [1.1.1](#111)
 - [1.1.0](#110)
 - [1.0.3](#103)
@@ -24,6 +25,117 @@
 - [0.10.1](#0101---20170327)
 - [0.10.0](#0100---20170307)
 - [0.9.9 and prior](#099---20170202)
+
+## [nokia-1.1.1]
+
+> Released on: 2020/08/12
+
+### Additions
+
+#### Core
+
+- Add MariaDB support. Minimal supported version of MariaDB is 10.3.17.
+  To run Kong with MariaDB, set `database=maria` and other `maria_*`envs
+  described below and in the `kong.conf.default` file.
+  [fe30f19](https://github.com/nokia/kong/commit/fe30f19a0c5a2ae58c16431a369c28ea6085dbac)
+- Add IPv6 support. Kong can listen on an IPv6 address as well as
+  Cassandra works in the IPv6 environment in the cluster.
+  [323c93](https://github.com/Kong/kong/commit/e323c9325f2cdf0d03fe57f8c4652118183e7884)
+- Add a Cassandra cluster topology feature.
+  It's a mechanism to refresh information about nodes in cassandra cluster.
+  Configurable by `cassandra_cluster_refresh_interval` described below and
+  in the `kong.conf.default` file.
+  You can check the status of the cluster at the following Admin API endpoint:
+  `/utils/databse`.
+  [d0ceb53](https://github.com/Kong/kong/commit/d0ceb53970a58fa4a7837c76135e2e10f8fef3c9)
+- Add the certificate expiration warning to periodically check the expiration
+  date for all certificates used by Kong.
+  Configurable by `validate_certs_refresh_interval` and
+  `validate_certs_warn_before` described below and in the `kong.conf.default`
+  file.
+  [abb11cc](https://github.com/Kong/kong/commit/abb11cc3050b89f3538c73736fc3f405744eb79f)
+- Add mTLS support. Feature works between client <-> Kong and Kong <-> upstream.
+  There is no solution for Kong <-> database.
+  Configurable by `nginx_admin_ssl_verify_client`,
+  `nginx_admin_ssl_client_certificate`, `nginx_proxy_ssl_verify_client` and
+  `nginx_proxy_ssl_client_certificate` described below and in
+  the `kong.conf.default` file.
+  [e7abf24](https://github.com/Kong/kong/commit/e7abf24459ce5cc644be96deae99f57f001f928f)
+- Add a new endpoint with an OpenAPI specification of Kong 1.1.1.
+  [bf152fd](https://github.com/Kong/kong/commit/bf152fda5ec1c9e876fa4baa2167e632a259d625)
+
+#### Configuration
+
+- New option in `kong.conf`: `database=maria` to start Kong with MariaDB.
+- New option in `kong.conf`: `maria_host` to set the database host.
+- New option in `kong.conf`: `maria_port` to set the database port.
+- New option in `kong.conf`: `maria_database` to set the database name.
+- New option in `kong.conf`: `maria_timeout` to set the database timeout.
+- New option in `kong.conf`: `maria_user` to set the database user.
+- New option in `kong.conf`: `maria_password` to set the database user password.
+- New option in `kong.conf`: `maria_ssl` to toggle client-server TLS connections.
+- New option in `kong.conf`: `maria_ssl_verify` for server certificate
+  verification.
+- New option in `kong.conf`: `maria_socket_pool_size` to specify the size limit
+  for every cosocket connection pool associated with every nginx worker process.
+- New option in `kong.conf`: `maria_socket_keepalive_timeout` to control
+  the default maximal idle time (in ms) of the connections in the cosocket
+  built-in connection pool. When this timeout reaches, idle connections will
+  be closed and removed from the pool.
+- New option in `kong.conf`: `cassandra_cluster_refresh_interval` to define
+  the timer (in seconds) which will periodically check cassandra cluster
+  topology and refresh existing list of Cassandra nodes if something has changed.
+- New option in `kong.conf`: `validate_certs_refresh_interval` to set the timer
+  which will periodically check the expiration date for all certificates used
+  by Kong. If value set to less then 300, 300 will be used anyway.
+- New option in `kong.conf`: `validate_certs_warn_before` to set
+  a number of days before certificate expiration date to warn the user.
+- New option in `kong.conf`: `nginx_admin_ssl_verify_client` to set
+  the verification of the client certificate on the Kong Admin SSL port.
+  Possible values are:
+  - on - client certificate is required and has to be signed with trusted CA.
+  - optional - requests the client certificate and verifies it
+  if the certificate is present.
+  - off - client certificate is not requested.
+- New option in `kong.conf`: `nginx_admin_ssl_client_certificate` to specify
+  a file with trusted CA certificates in the PEM format used to verify
+  client certificates.
+- New option in `kong.conf`: `nginx_proxy_ssl_verify_client` to set
+  the verification of the client certificate on the Kong Proxy SSL port.
+  Possible values are:
+  - on - client certificate is required and has to be signed with trusted CA.
+  - optional - requests the client certificate and verifies it
+  if the certificate is present.
+  - off - client certificate is not requested.
+- New option in `kong.conf`: `nginx_proxy_ssl_client_certificate` to specify
+  a file with trusted CA certificates in the PEM format used to verify client
+  certificates.
+
+#### Admin API
+
+- New Admin API endpoint: `/utils/databse` to get status of the Cassandra
+  cluster.
+- New Admin API endpoint: `/utils/openapi` to get the OpenAPI
+  specification of Kong 1.1.1.
+
+### Changes
+
+##### Dependencies
+
+- Add a
+  [nokia-fork-lua-resty-mysql](https://luarocks.org/modules/robertpm-nokia/nokia-fork-lua-resty-mysql)
+  library to deliver the MariaDB support.
+- Replace the `lua-resty-dns-client` library with a
+  [nokia-fork-lua-resty-dns-client](https://luarocks.org/modules/robertpm-nokia/nokia-fork-lua-resty-dns-client)
+  library to deliver the IPv6 support.
+- Replace the `lua-cassandra` library with a
+  [nokia-fork-lua-cassandra](https://luarocks.org/modules/robertpm-nokia/nokia-fork-lua-cassandra)
+  library to deliver the Cassandra cluster topology feature.
+
+### Fixes
+
+- Fix a special characters issue located in database passwords values.
+  [f37c754](https://github.com/Kong/kong/commit/f37c75451b2622ccd377870f578c592eb760e3f6)
 
 ## [1.1.1]
 
